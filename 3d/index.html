@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#202a31">
+  <meta name="description" content="MINO 3D : premier prototype en vraie 3D temps réel, avec interactions et répétition de la voix.">
+  <title>MINO 3D — Prototype temps réel</title>
+  <style>
+    * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    :root { font-family: ui-rounded, 'Trebuchet MS', system-ui, sans-serif; color:#f9eddb; }
+    html,body { padding:0; margin:0; min-height:100%; background:#1b222b; }
+    button,a { font:inherit; }
+    button { cursor:pointer; touch-action:manipulation; }
+    button:focus-visible,a:focus-visible {outline:3px solid #ffda91;outline-offset:3px}
+    .layout { min-height:100svh; display:flex; align-items:center; justify-content:center; gap:clamp(24px,5vw,90px); padding:24px; background:radial-gradient(circle at 28% 20%,#3e424c,transparent 41%),radial-gradient(circle at 80% 80%,#253441,transparent 54%); }
+    .copy { max-width:340px; }
+    .eyebrow { display:inline-flex;align-items:center;gap:8px;border:1px solid #817c6a;border-radius:40px;padding:9px 14px;color:#f8d295;font-size:11px;font-weight:900;letter-spacing:2px; }
+    .copy h1 {margin:24px 0 14px;font-size:clamp(43px,5vw,72px);line-height:1;letter-spacing:-3px;font-weight:1000}
+    .copy h1 span { color:#f4b976; }
+    .copy p { color:#d0c9bf;line-height:1.75;font-size:16px; }
+    .copy ul { list-style:none; padding:0; display:grid; gap:14px; margin:30px 0; }
+    .copy li { display:flex; align-items:flex-start; gap:12px; color:#efe6da; font-size:13px; line-height:1.45; }
+    .copy li b { color:#ffe0ad; }
+    .copy li i { font-style:normal;display:grid;place-items:center;flex:0 0 42px;height:42px;background:#3d434b;border:1px solid #575b61;border-radius:12px;font-size:22px; }
+    .copy a { color:#f6cc90; text-underline-offset:3px; }
+    .note { font-size:12px!important;color:#aeb5b9!important;line-height:1.6!important; }
+    .phone { position:relative;overflow:hidden;flex:0 0 auto;width:min(440px,100%);height:min(850px,calc(100svh - 42px));min-height:650px;border:9px solid #101922;border-radius:36px;background:#a9836a;box-shadow:0 32px 100px #000b,0 0 0 2px #6e6b6a; }
+    .viewport { position:absolute;inset:0 0 175px;background:#a9836a;overflow:hidden; }
+    .viewport canvas { display:block;width:100%;height:100%;touch-action:none; }
+    .top { position:absolute;z-index:3;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:26px 23px 38px;pointer-events:none;background:linear-gradient(#242b33df,#242b3380 65%,transparent); }
+    .logo small {display:block;font-size:9px;letter-spacing:2.2px;color:#f4d59d;font-weight:900;text-transform:uppercase}
+    .logo strong {display:block;font-size:40px;line-height:1;font-weight:1000;letter-spacing:-3px;text-shadow:2px 3px #23313e66}
+    .flag { border-radius:40px;border:1px solid #ded0ba95;background:#242f36a9;padding:8px 11px;font-size:10px;letter-spacing:1px;font-weight:900;color:#f8dba7; }
+    .hint {position:absolute;z-index:3;left:50%;bottom:18px;transform:translateX(-50%);width:max-content;max-width:92%;border-radius:30px;background:#233039b0;border:1px solid #fff4;padding:8px 13px;color:#fff4d4;font-size:11px;font-weight:800;text-align:center;pointer-events:none; }
+    .badge {position:absolute;top:100px;right:14px;z-index:2;color:#fff2d5;font-size:10px;font-weight:800;border-radius:9px;background:#23313c8c;padding:6px 10px;pointer-events:none;}
+    .emoji {position:absolute;z-index:4;top:26%;right:12%;font-size:44px;transform:translateY(15px) scale(.7);opacity:0;pointer-events:none;filter:drop-shadow(0 4px 2px #2b252b70);}
+    .emoji.show { animation:pop .9s ease-out forwards; }
+    @keyframes pop {0%{opacity:0;transform:translateY(15px) scale(.7)}25%,75%{opacity:1;transform:translateY(-7px) scale(1.08)}100%{opacity:0;transform:translateY(-23px) scale(.9)}}
+    .panel {position:absolute;left:0;right:0;bottom:0;height:175px;padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(#323e47,#1f2a32);border-top:5px solid #141e26;box-shadow:0 -7px 25px #12181c80;}
+    .status {min-height:26px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:900;font-size:12px;color:#f6e3bf;}
+    .buttons {display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:7px;}
+    .action {height:49px;border-radius:12px;background:linear-gradient(#fff6d8,#ddcda8);border:1px solid #e9c99d;border-bottom:4px solid #8d7857;color:#392d29;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:5px;}
+    .action span {font-size:20px;}
+    .action:active,.mic:active {transform:translateY(2px)}
+    .mic {display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:54px;margin-top:9px;border-radius:14px;border:1px solid #ffc19b;border-bottom:4px solid #9f4c37;background:linear-gradient(#ffb28b,#ee825f);color:#3e2a26;font-weight:1000;font-size:14px;}
+    .mic .disc {display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#fff2df;font-size:18px;}
+    .mic.recording {background:linear-gradient(#f96f75,#d5384b);color:#fff;border-color:#ffc5c5;animation:pulse 1s infinite alternate}
+    .mic:disabled {opacity:.6;cursor:wait}
+    @keyframes pulse {to{box-shadow:0 0 0 6px #f6686a66}}
+    .fallback {display:none;position:absolute;top:40%;left:6%;right:6%;z-index:7;background:#282e35;color:#fff7e4;padding:20px;border-radius:14px;font-size:14px;line-height:1.6;text-align:center;}
+    @media(max-width:800px) { .layout {padding:0;display:block;background:#121a22}.copy{display:none}.phone{width:100vw;max-width:520px;height:100svh;min-height:0;border:0;border-radius:0;margin:0 auto;box-shadow:none}.top{padding-top:max(23px,env(safe-area-inset-top,0px));}.viewport{bottom:175px} }
+    @media(max-height:690px) { .top {padding-top:17px}.logo strong{font-size:32px}.viewport{bottom:158px}.panel{height:158px;padding-top:5px}.status{min-height:22px}.action{height:43px}.mic{height:47px;margin-top:6px} }
+    @media(prefers-reduced-motion:reduce){.emoji.show{animation:none;opacity:1}.mic.recording{animation:none}}
+  </style>
+</head>
+<body>
+  <main class="layout">
+    <section class="copy">
+      <div class="eyebrow">✦ LABORATOIRE 3D</div>
+      <h1>MINO.<br><span>Pour de vrai.</span></h1>
+      <p>Cette fois, le chat existe dans une scène en trois dimensions. On peut tourner autour de lui, il possède une tête, des bras, des pattes et une queue animés séparément.</p>
+      <ul>
+        <li><i>👆</i><div><b>Touche Mino</b><br>Ses réactions utilisent des mouvements 3D.</div></li>
+        <li><i>↔️</i><div><b>Glisse le doigt</b><br>Fais-le pivoter pour voir son volume.</div></li>
+        <li><i>🎙️</i><div><b>Parle</b><br>Sa bouche suit le volume de la voix répétée.</div></li>
+      </ul>
+      <p class="note">Prototype technique 3D. Les formes du chat sont encore provisoires : nous améliorerons son modèle, ses textures et son squelette après validation des interactions.</p>
+      <p><a href="../">← Revenir à MINO 0.2</a></p>
+    </section>
+    <section class="phone" aria-label="Jeu MINO 3D">
+      <div class="viewport" id="viewport">
+        <canvas id="scene" aria-label="Scène 3D interactive avec le chat Mino"></canvas>
+        <div class="top"><div class="logo"><small>le petit chat parlant</small><strong>MINO<span style="color:#f9b768">!</span></strong></div><div class="flag">✦ 3D BETA</div></div>
+        <div class="badge">WEBGL · TEMPS RÉEL</div>
+        <div class="hint">Touche le chat · Glisse pour le tourner</div>
+        <div id="emoji" class="emoji" aria-hidden="true">♥</div>
+        <div id="fallback" class="fallback" role="alert">La 3D n'a pas pu démarrer. Essaie une version récente de Chrome ou Edge avec l'accélération graphique activée.</div>
+      </div>
+      <div class="panel">
+        <div id="status" class="status" role="status" aria-live="polite">Salut ! Touche-moi ou fais-moi tourner 🐾</div>
+        <div class="buttons">
+          <button class="action" data-action="milk"><span>🥛</span> Lait</button>
+          <button class="action" data-action="tickle"><span>😹</span> Chatouille</button>
+          <button class="action" data-action="scratch"><span>🐾</span> Griffe</button>
+        </div>
+        <button class="mic" id="record"><span class="disc">🎙️</span><span id="record-label">Parler à Mino</span></button>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>

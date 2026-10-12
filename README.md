@@ -2,7 +2,6 @@
 
 Mini-jeu de chat parlant inspiré de l'ambiance des premières applications mobiles de 2010.
 
-**[Tester la dernière version privée](https://mino-retro-2010.kwmxworh2760802.chatgpt.site)**
 
 > MINO est un personnage original, indépendant de Talking Tom et d'Outfit7.
 
@@ -63,3 +62,15 @@ Aucune bibliothèque JavaScript n'est requise. Les sprites et le décor sont des
 ## Licence
 
 Ce dépôt est public. Aucun droit de réutilisation n'est accordé par défaut au-delà de la consultation ; nous pourrons choisir une licence explicite plus tard.
+
+## Laboratoire 3D temps réel
+
+Une première scène WebGL indépendante est disponible dans [3d/](./3d/).
+Elle utilise Three.js **0.180.0** (licence MIT dans `3d/vendor/`) et un chat en vraie géométrie 3D : tête, bras, pattes, queue, yeux et bouche sont animables séparément.
+
+Après `git pull origin main` et `py -m http.server 8000` :
+
+- Version historique : **http://localhost:8000/**
+- Prototype 3D : **http://localhost:8000/3d/**
+
+C'est une base technique à améliorer, pas encore un modèle 3D définitif.
