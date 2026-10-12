@@ -15,7 +15,7 @@ Mini-jeu de chat parlant inspiré de l'ambiance des premières applications mobi
 - Adapté à l'ordinateur et au téléphone, sans publicité ni compte.
 - Les enregistrements restent dans ton navigateur.
 
-Le jeu est toujours en **2D animée à partir d'images 3D**, pas encore un modèle 3D temps réel. C'est un prototype rapide pour valider le style et les interactions.
+La version historique à la racine reste en **2D animée à partir d'images 3D**. La nouvelle expérience 3D temps réel est dans `3d/`.
 
 ## Installer dans ton dossier Windows
 
@@ -48,24 +48,29 @@ MINO/
 │   ├── mino-idle.webp  # Position normale
 │   ├── mino-talk.webp  # Bouche ouverte
 │   └── mino-blink.webp # Yeux fermés
+├── 3d/                 # Version 0.3 WebGL temps réel
+│   ├── index.html       # Interface 3D
+│   ├── game.js          # Scène, interactions et voix
+│   ├── mino-model.js    # Géométrie originale du chat
+│   └── vendor/          # Three.js 0.180.0 + licence MIT
 └── README.md
 ```
 
-Aucune bibliothèque JavaScript n'est requise. Les sprites et le décor sont des images optimisées WebP.
+La version historique n'utilise pas de bibliothèque JavaScript. La version 3D utilise Three.js embarqué localement ; aucun CDN n'est nécessaire.
 
 ## Ensuite
 
 - Tester le microphone et l'animation de bouche sur plusieurs appareils.
 - Ajouter davantage d'expressions, de poses et de sons originaux.
-- Évaluer une vraie version 3D animée ou une application Android.
+- Améliorer les expressions et le squelette articulé de MINO 3D, puis évaluer une application Android.
 
 ## Licence
 
 Ce dépôt est public. Aucun droit de réutilisation n'est accordé par défaut au-delà de la consultation ; nous pourrons choisir une licence explicite plus tard.
 
-## Laboratoire 3D temps réel
+## MINO 0.3 — vraie 3D temps réel
 
-Une première scène WebGL indépendante est disponible dans [3d/](./3d/).
+Une scène WebGL indépendante est disponible dans [3d/](./3d/). Le modèle original de MINO a été retravaillé : tête féline aux grosses joues, yeux verts, oreilles latérales, pattes plus naturelles, textures de fourrure et petit décor de ruelle.
 Elle utilise Three.js **0.180.0** (licence MIT dans `3d/vendor/`) et un chat en vraie géométrie 3D : tête, bras, pattes, queue, yeux et bouche sont animables séparément.
 
 Après `git pull origin main` et `py -m http.server 8000` :
@@ -73,4 +78,4 @@ Après `git pull origin main` et `py -m http.server 8000` :
 - Version historique : **http://localhost:8000/**
 - Prototype 3D : **http://localhost:8000/3d/**
 
-C'est une base technique à améliorer, pas encore un modèle 3D définitif.
+C'est une étape de création originale en 3D temps réel, pas encore un modèle 3D définitif. Les fichiers visuels de référence de Talking Tom ne sont pas inclus dans ce dépôt.
