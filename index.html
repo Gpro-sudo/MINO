@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#20242c">
+  <meta name="description" content="Mino : un petit chat parlant rétro, inspiré de la magie des premiers jeux mobiles.">
+  <title>Mino — Un chat, des souvenirs</title>
+  <style>
+    :root { color-scheme: light; font-family: 'Trebuchet MS', 'Arial Rounded MT Bold', system-ui, sans-serif; font-synthesis: none; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; min-height: 100%; }
+    body { background: #212630; color: #fffaf1; overflow-x: hidden; }
+    button { font: inherit; cursor: pointer; touch-action: manipulation; }
+    button:focus-visible, [role="button"]:focus-visible { outline: 3px solid #ffe183; outline-offset: 4px; }
+    .page { min-height: 100svh; display: flex; justify-content: center; align-items: center; gap: clamp(24px, 5vw, 95px); padding: 32px 22px; background: radial-gradient(circle at 45% 12%, #41444c, transparent 42%), radial-gradient(circle at 80% 90%, #292d3c, transparent 48%); }
+    .intro { width: 330px; max-width: 38vw; align-self: center; }
+    .intro .eyebrow { display: inline-flex; gap: 9px; align-items: center; border: 1px solid #78796e; border-radius: 30px; padding: 9px 14px; color: #f6d58b; font-weight: 900; letter-spacing: 2.5px; font-size: 10px; text-transform: uppercase; }
+    .spark { color: #f6cf75; font-size: 18px; }
+    .intro h1 { margin: 28px 0 14px; font-size: clamp(42px, 5vw, 72px); letter-spacing: -4px; line-height: .98; font-weight: 1000; }
+    .intro h1 em { display: inline-block; color: #f4c26f; font-style: normal; transform: rotate(-5deg); }
+    .intro p { font-size: 16px; color: #c6c3c0; line-height: 1.8; }
+    .instructions { margin-top: 30px; display: grid; gap: 16px; }
+    .instruction { display: flex; gap: 14px; align-items: center; color: #ded7cf; font-size: 13px; line-height: 1.5; }
+    .instruction .symbol { background: #3d4147; border: 1px solid #545860; border-radius: 12px; display: grid; place-items: center; font-size: 24px; min-width: 48px; height: 48px; }
+    .privacy { margin-top: 30px; padding: 16px; background: #2f353b; border-radius: 14px; border: 1px solid #444952; color: #c3c1bd; font-size: 12px; line-height: 1.6; }
+    .privacy b { color: #eee2c8; }
+    .phone { position: relative; width: min(430px, 100%); height: min(840px, calc(100svh - 54px)); min-height: 640px; border: 9px solid #11151c; border-radius: 38px; overflow: hidden; flex-shrink: 0; box-shadow: 0 35px 100px #0009, 0 0 0 2px #55515b, inset 0 0 12px #000; background: #b8a08c; isolation: isolate; }
+    .phone::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 20; border-radius: 26px; box-shadow: inset 0 0 20px #48352c24; }
+    .game-top { position: absolute; top: 0; left: 0; right: 0; height: 113px; z-index: 9; display: flex; align-items: flex-start; justify-content: space-between; padding: 25px 25px 0; background: linear-gradient(#29333be8, #29333bba 72%, transparent); }
+    .brand { display: flex; flex-direction: column; }
+    .brand span { color: #f2d49d; font-size: 9px; text-transform: uppercase; letter-spacing: 3px; font-weight: 900; margin-bottom: 2px; }
+    .brand strong { font-size: 39px; font-weight: 1000; letter-spacing: -3px; line-height: 1; color: #fff2d8; text-shadow: 2px 3px #2a3039; }
+    .year { color: #f3dfbc; border: 1px solid #acaa9b9a; background: #323b4399; border-radius: 50px; padding: 7px 10px; font-size: 10px; font-weight: 900; letter-spacing: 1.2px; }
+    .stage { position: absolute; top: 0; bottom: 170px; left: 0; right: 0; overflow: hidden; background-color: #9c7f6b; background-image: linear-gradient(#fff0 0 94%, #5c4b4170 95% 100%), repeating-linear-gradient(0deg, #0000 0 64px, #6f554980 65px 67px), repeating-linear-gradient(90deg, #0000 0 110px, #5d4a4070 111px 114px); background-size: 100% 100%, 100% 100%, 230px 100%; }
+    .stage::before { content: ''; position: absolute; inset: 0 0 20%; pointer-events: none; background: radial-gradient(ellipse at 50% 34%, #e4cbb193 0%, #dbbaa033 46%, #2a211c6b 100%); z-index: 1; }
+    .stage::after { content: ''; position: absolute; bottom: -3px; left: -15%; width: 130%; height: 30%; background: repeating-linear-gradient(95deg,#584c45 0 2px,#0000 3px 80px), repeating-linear-gradient(0deg,#0000 0 58px,#4d4439 59px 63px), linear-gradient(#8f8271,#62584f); transform: perspective(200px) rotateX(25deg); transform-origin: bottom; box-shadow: 0 -13px 15px #362a2455; z-index: 2; }
+    .poster { position: absolute; top: 25%; left: 9%; transform: rotate(-11deg); color: #423f39; opacity: .35; border: 2px dashed #504639; padding: 4px 8px; font-family: Georgia, serif; font-weight: 900; font-size: 10px; letter-spacing: 2px; z-index: 1; }
+    .wall-crack { position: absolute; right: 12%; top: 22%; width: 40px; height: 75px; border-left: 2px solid #4a403d56; transform: rotate(13deg); z-index: 1; clip-path: polygon(0 0,100% 0,100% 100%,0 100%); }
+    .wall-crack::after { content:''; position:absolute; top: 34px; left: -1px; width: 34px; height: 30px; border-top: 2px solid #4a403d56; transform:rotate(-25deg); }
+    .cat-holder { position: absolute; z-index: 4; width: min(98%, 470px); height: min(80%, 540px); left: 50%; bottom: 1%; transform: translateX(-50%); filter: drop-shadow(0 11px 7px #34261c75); }
+    .cat-holder svg { width: 100%; height: 100%; overflow: visible; user-select: none; -webkit-user-select: none; }
+    .hotspot { cursor: pointer; }
+    .hotspot:hover { filter: brightness(1.05); }
+    #cat-root { transform-origin: 50% 95%; }
+    #tail { transform-origin: 70% 77%; animation: tailIdle 3s ease-in-out infinite; }
+    #head { transform-origin: 50% 37%; animation: headIdle 3.7s ease-in-out infinite; }
+    #eye-pair { transform-origin: center 188px; animation: blink 6.4s infinite; }
+    #smile, #talk-mouth { transition: opacity .1s; }
+    #talk-mouth { opacity: 0; transform-box: fill-box; transform-origin: center; }
+    .cat-holder.talking #talk-mouth { opacity: 1; animation: speaking .18s ease-in-out infinite alternate; }
+    .cat-holder.talking #smile { opacity: 0; }
+    .cat-holder.tickle #cat-root { animation: wobble .55s ease-in-out; }
+    .cat-holder.tickle #head { animation: headTilt .55s ease-in-out; }
+    .cat-holder.hop #cat-root { animation: hop .75s cubic-bezier(.2,.6,.5,1); }
+    .cat-holder.scratch #front-paw-right { animation: scratch .14s ease-in-out 6 alternate; }
+    .cat-holder.wag #tail { animation: wag .14s ease-in-out 8 alternate; }
+    .cat-holder.milk #head { animation: sip .22s ease-in-out 7 alternate; }
+    @keyframes tailIdle { 0%,100% { transform:rotate(-3deg) } 50% { transform:rotate(7deg) } }
+    @keyframes headIdle { 0%,100% { transform:rotate(-1deg) } 50% { transform:rotate(2deg) } }
+    @keyframes blink { 0%,42%,44%,68%,70%,100% { transform:scaleY(1) } 43%,69% { transform:scaleY(.07) } }
+    @keyframes speaking { from { transform:scaleY(.5) } to { transform:scaleY(1.5) } }
+    @keyframes wobble { 0%,100%{ transform:rotate(0)}20%{transform:rotate(-7deg)}40%{transform:rotate(8deg)}60%{transform:rotate(-5deg)}80%{transform:rotate(3deg)} }
+    @keyframes headTilt { 0%,100%{transform:rotate(0)}50%{transform:rotate(-10deg)} }
+    @keyframes hop { 0%,100%{transform:translateY(0) scaleY(1)} 15%{transform:translateY(10px) scaleY(.94)} 50%{transform:translateY(-45px) scaleY(1.04)} 83%{transform:translateY(4px) scaleY(.96)} }
+    @keyframes scratch { from{transform:rotate(0)}to{transform:rotate(-30deg) translate(-13px,-14px)} }
+    @keyframes wag { from{transform:rotate(-13deg)}to{transform:rotate(18deg)} }
+    @keyframes sip { from{transform:rotate(0)}to{transform:rotate(7deg)} }
+    .floor-shadow { position: absolute; z-index: 3; width: 55%; height: 21px; left: 23%; bottom: 2.5%; background: #251b18a3; border-radius: 50%; filter: blur(11px); }
+    .bubble { position: absolute; z-index: 7; top: 28%; left: 50%; transform: translate(-50%, 12px) scale(.8); background: #fff9df; border: 3px solid #2c3239; border-radius: 50%; width: 76px; height: 76px; display: grid; place-items: center; font-size: 38px; box-shadow: 5px 5px 0 #26272780; opacity: 0; pointer-events: none; }
+    .bubble.show { animation: pop .95s cubic-bezier(.2,.8,.2,1) forwards; }
+    @keyframes pop { 0%{opacity:0;transform:translate(-50%,15px) scale(.5)}25%{opacity:1;transform:translate(-50%,-15px) scale(1.1)}72%{opacity:1;transform:translate(-50%,-21px) scale(1)}100%{opacity:0;transform:translate(-50%,-35px) scale(.9)} }
+    .milk-glass { position:absolute; z-index:5; bottom:14%; left:17%; width:42px; height:60px; background:linear-gradient(100deg,#ffffff9c,#fcffffde 40%,#cfebfa9c); border:3px solid #e1f4fbdc; border-top:6px solid #dae5ec; border-radius:5px 5px 14px 14px; transform:rotate(-10deg) translateY(30px); opacity:0; pointer-events:none; box-shadow:3px 5px 7px #30282238; }
+    .milk-glass::after { content:''; position:absolute; bottom:4px; left:4px; right:4px; height:67%; background:#f6f7e9; border-radius:3px 3px 7px 7px; }
+    .milk-glass.show { animation: glass 1.6s ease-in-out forwards; }
+    @keyframes glass { 0%{opacity:0;transform:translate(0,28px) rotate(-10deg)}24%,75%{opacity:1;transform:translate(48px,-105px) rotate(11deg)}100%{opacity:0;transform:translate(0,28px) rotate(-10deg)} }
+    .claw { position:absolute; z-index: 8; top: 38%; right: 12%; font-size: 80px; line-height:1; font-weight:1000; color:#fff9e0; text-shadow:3px 4px #2a2a2a; transform:rotate(-15deg); opacity:0; pointer-events:none; }
+    .claw.show { animation: claw .8s forwards; }
+    @keyframes claw { 0%,100%{opacity:0}20%,68%{opacity:.95} }
+    .panel { position:absolute; z-index:10; left:0; right:0; bottom:0; height:180px; padding:13px 16px calc(14px + env(safe-area-inset-bottom, 0px)); background:linear-gradient(#343b42,#20272e); border-top:5px solid #11191f; box-shadow:0 -8px 18px #13161735; }
+    .message { display:flex; justify-content:center; align-items:center; height:27px; font-size:12px; color:#f8e8c8; text-align:center; font-weight:800; letter-spacing:.2px; }
+    .controls { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-top:7px; }
+    .control { min-height:52px; border:1px solid #82755e; border-bottom:4px solid #5a493a; border-radius:12px; color:#3b3531; background:linear-gradient(#fff7df,#ddcfb1); display:flex; align-items:center; justify-content:center; gap:7px; font-size:12px; font-weight:1000; box-shadow:0 2px 0 #1118; }
+    .control .emoji { font-size:22px; }
+    .control:active { transform:translateY(3px);border-bottom-width:1px; }
+    .record { width:100%; min-height:55px; margin-top:10px; border:1px solid #ffcf8a; border-bottom:4px solid #a34f39; border-radius:15px; background:linear-gradient(#faaa74,#e87853); color:#38251e; font-size:15px; font-weight:1000; letter-spacing:.2px; display:flex; justify-content:center; gap:12px; align-items:center; box-shadow:0 3px 0 #0d1318a8; }
+    .record .mic { display:grid; place-items:center; width:29px; height:29px; border-radius:50%; background:#fff0d2; font-size:18px; }
+    .record:disabled { opacity:.7; cursor:wait; }
+    .record.recording { background:linear-gradient(#fa6e6e,#d73b45); color:#fff; border-color:#ffb7b7; animation:pulse 1s infinite alternate; }
+    @keyframes pulse { to{box-shadow:0 0 0 6px #f6686a55} }
+    .credit { text-align:center; color:#a8a9a4; font-size:11px; margin-top:24px; }
+    .count { color:#f5d080; font-weight:900; }
+    @media (max-width:780px) {
+      body { background:#151a20; }
+      .page { padding:0; background:#151a20; display:block; }
+      .intro { display:none; }
+      .phone { width:100vw; max-width:500px; height:100svh; min-height:0; border:0; border-radius:0; margin:0 auto; box-shadow:none; }
+      .game-top { padding-top: max(22px, env(safe-area-inset-top, 0px)); }
+      .stage { bottom:170px; }
+      .cat-holder { height:min(80%,590px); }
+      .panel { height:180px; }
+    }
+    @media (max-height:700px) { .game-top { height:85px;padding-top:16px } .brand strong { font-size:31px; } .stage{bottom:155px} .panel{height:155px;padding-top:7px} .panel .message{height:20px} .control{min-height:45px}.record{min-height:48px;margin-top:7px}.cat-holder{height:80%} }
+    @media (prefers-reduced-motion:reduce) { #head,#tail,#eye-pair{animation:none} }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="intro" aria-label="Bienvenue dans Mino">
+      <div class="eyebrow"><span class="spark">✦</span> LE PETIT JEU RÉTRO</div>
+      <h1>Un chat.<br>Une voix.<br><em>2010.</em></h1>
+      <p>Le plaisir des premiers jeux sur téléphone : un petit compagnon espiègle, quelques boutons, et beaucoup de fous rires.</p>
+      <div class="instructions">
+        <div class="instruction"><span class="symbol">👆</span><span>Touche sa tête, son ventre, ses pattes… et même sa queue.</span></div>
+        <div class="instruction"><span class="symbol">🎙️</span><span>Appuie sur « Parler », dis quelque chose, puis réappuie : il le répétera !</span></div>
+        <div class="instruction"><span class="symbol">🥛</span><span>Retrouve les gestes absurdes et les petites surprises de l'époque.</span></div>
+      </div>
+      <div class="privacy">🔒 <b>100 % dans ton navigateur.</b><br>La voix reste sur ton appareil. Aucun compte, aucune publicité, aucun envoi du micro à un serveur.</div>
+      <div class="credit">Prototype nostalgique indépendant • personnage original</div>
+    </section>
+    <section class="phone" aria-label="Jeu Mino">
+      <div class="game-top"><div class="brand"><span>le petit chat parlant</span><strong>MINO<span style="color:#f8b85b;font-size:32px">!</span></strong></div><div class="year">★ RETRO · 2010</div></div>
+      <div class="stage">
+        <div class="poster">MEOW<br>CLUB</div><div class="wall-crack"></div><div class="floor-shadow"></div>
+        <div id="cat" class="cat-holder">
+          <svg viewBox="0 0 400 540" aria-label="Mino, un chat gris interactif" role="img">
+            <defs>
+              <radialGradient id="fur" cx="38%" cy="28%" r="75%"><stop offset="0" stop-color="#b5b5ae"/><stop offset=".53" stop-color="#868782"/><stop offset="1" stop-color="#494f51"/></radialGradient>
+              <radialGradient id="lightfur" cx="42%" cy="32%" r="80%"><stop offset="0" stop-color="#d1ccc2"/><stop offset=".6" stop-color="#a5a49d"/><stop offset="1" stop-color="#696d6c"/></radialGradient>
+              <radialGradient id="belly" cx="45%" cy="26%" r="73%"><stop offset="0" stop-color="#e9e0d0"/><stop offset="1" stop-color="#b3b0a9"/></radialGradient>
+              <linearGradient id="ears"><stop stop-color="#666b6a"/><stop offset=".55" stop-color="#a9a6a0"/><stop offset="1" stop-color="#494f51"/></linearGradient>
+              <radialGradient id="iris"><stop stop-color="#b9f17a"/><stop offset=".6" stop-color="#85bc47"/><stop offset="1" stop-color="#426526"/></radialGradient>
+              <linearGradient id="nose" x2="0" y2="1"><stop stop-color="#f9b9b4"/><stop offset="1" stop-color="#a65f67"/></linearGradient>
+            </defs>
+            <g id="cat-root">
+              <g id="tail" class="hotspot" data-action="tail" role="button" tabindex="0" aria-label="Tirer la queue">
+                <path d="M267 390 C339 395 364 322 333 278 C319 260 305 264 302 284 C301 297 321 315 309 345 C302 362 283 361 259 354" fill="none" stroke="#4c5353" stroke-width="40" stroke-linecap="round"/>
+                <path d="M267 390 C339 395 364 322 333 278 C319 260 305 264 302 284 C301 297 321 315 309 345 C302 362 283 361 259 354" fill="none" stroke="#858984" stroke-width="28" stroke-linecap="round"/>
+                <path d="M337 310 Q349 322 342 339" fill="none" stroke="#5d6461" stroke-width="11" stroke-linecap="round"/>
+              </g>
+              <g id="body" class="hotspot" data-action="belly" role="button" tabindex="0" aria-label="Chatouiller le ventre">
+                <path d="M141 306 C119 328 104 396 116 456 Q198 488 280 456 C297 389 285 326 259 302Z" fill="url(#fur)" stroke="#454b4d" stroke-width="4"/>
+                <ellipse cx="201" cy="394" rx="64" ry="90" fill="url(#belly)" stroke="#898b87" stroke-width="2"/>
+                <path d="M173 322 Q193 339 221 325 M168 348 Q196 368 231 344" fill="none" stroke="#898f89" stroke-width="5" opacity=".58"/>
+                <path d="M151 396 Q167 410 158 438 M248 393 Q234 412 246 439" fill="none" stroke="#777e79" stroke-width="9" opacity=".65"/>
+              </g>
+              <g id="head" class="hotspot" data-action="head" role="button" tabindex="0" aria-label="Caresses sur la tête">
+                <path d="M91 149 L73 48 Q76 24 98 36 L157 79 Q188 69 212 70 L288 34 Q311 28 318 51 L303 149Z" fill="url(#ears)" stroke="#444a4b" stroke-width="5" stroke-linejoin="round"/>
+                <path d="M95 110 L85 53 Q86 48 96 55 L145 92Z" fill="#b97a80" opacity=".85"/><path d="M262 90 L301 53 Q307 51 304 64 L295 116Z" fill="#b97a80" opacity=".85"/>
+                <ellipse cx="199" cy="190" rx="120" ry="125" fill="url(#lightfur)" stroke="#464c4d" stroke-width="4"/>
+                <path d="M166 71 Q176 98 170 121 M199 66 Q201 100 199 119 M235 74 Q224 94 229 120" stroke="#666b69" stroke-width="12" fill="none" stroke-linecap="round" opacity=".78"/>
+                <path d="M94 155 Q117 163 132 160 M264 160 Q288 161 304 150 M90 193 Q108 187 125 193 M273 195 Q291 189 311 194" stroke="#626a68" stroke-width="9" fill="none" stroke-linecap="round" opacity=".58"/>
+                <g id="eye-pair">
+                  <ellipse cx="151" cy="179" rx="36" ry="47" fill="#f6f4e6" stroke="#747c76" stroke-width="3"/>
+                  <ellipse cx="247" cy="179" rx="36" ry="47" fill="#f6f4e6" stroke="#747c76" stroke-width="3"/>
+                  <ellipse cx="158" cy="184" rx="21" ry="33" fill="url(#iris)" stroke="#517432" stroke-width="2"/>
+                  <ellipse cx="240" cy="184" rx="21" ry="33" fill="url(#iris)" stroke="#517432" stroke-width="2"/>
+                  <ellipse cx="161" cy="184" rx="11" ry="25" fill="#1c2922"/><ellipse cx="237" cy="184" rx="11" ry="25" fill="#1c2922"/>
+                  <ellipse cx="151" cy="169" rx="8" ry="12" fill="#fff"/><ellipse cx="230" cy="169" rx="8" ry="12" fill="#fff"/>
+                </g>
+                <path d="M125 129 Q153 116 179 129 M218 129 Q248 115 276 130" fill="none" stroke="#707773" stroke-width="9" stroke-linecap="round"/>
+                <ellipse cx="167" cy="246" rx="52" ry="33" fill="#dedbd0"/><ellipse cx="232" cy="246" rx="52" ry="33" fill="#ddd8cd"/>
+                <path d="M183 224 Q200 212 217 223 L202 243 Q197 246 193 242Z" fill="url(#nose)" stroke="#875e62" stroke-width="2"/>
+                <path d="M198 243 L198 251" stroke="#565553" stroke-width="3" stroke-linecap="round"/>
+                <path id="smile" d="M198 251 Q179 273 160 252 M198 251 Q218 273 237 252" fill="none" stroke="#575752" stroke-width="3" stroke-linecap="round"/>
+                <ellipse id="talk-mouth" cx="200" cy="265" rx="17" ry="19" fill="#55313a" stroke="#765e62" stroke-width="3"/>
+                <g stroke="#e0ded2" stroke-width="3" stroke-linecap="round" fill="none" opacity=".88"><path d="M147 239 L82 227 M143 250 L79 255 M145 259 L94 281 M252 239 L318 226 M255 249 L323 253 M251 259 L309 282"/></g>
+                <g fill="#666b66"><circle cx="160" cy="237" r="2.5"/><circle cx="144" cy="244" r="2.5"/><circle cx="239" cy="236" r="2.5"/><circle cx="256" cy="244" r="2.5"/></g>
+              </g>
+              <g id="front-paw-left" class="hotspot" data-action="paws" role="button" tabindex="0" aria-label="Toucher la patte gauche">
+                <path d="M125 332 C98 359 99 442 119 472 Q144 484 164 460 L174 355Z" fill="url(#fur)" stroke="#515a59" stroke-width="4"/>
+                <ellipse cx="125" cy="474" rx="38" ry="23" fill="url(#lightfur)" stroke="#515958" stroke-width="4"/>
+                <path d="M117 464 L116 485 M137 465 L140 484" stroke="#747a77" stroke-width="2.5" stroke-linecap="round"/>
+              </g>
+              <g id="front-paw-right" class="hotspot" data-action="paws" role="button" tabindex="0" aria-label="Toucher la patte droite">
+                <path d="M274 335 C301 360 301 440 281 470 Q258 486 238 460 L228 354Z" fill="url(#fur)" stroke="#515a59" stroke-width="4"/>
+                <ellipse cx="273" cy="473" rx="38" ry="23" fill="url(#lightfur)" stroke="#515958" stroke-width="4"/>
+                <path d="M264 464 L263 485 M283 464 L288 484" stroke="#747a77" stroke-width="2.5" stroke-linecap="round"/>
+              </g>
+              <ellipse cx="165" cy="503" rx="42" ry="20" fill="url(#fur)" stroke="#535b59" stroke-width="3"/><ellipse cx="235" cy="503" rx="42" ry="20" fill="url(#fur)" stroke="#535b59" stroke-width="3"/>
+            </g>
+          </svg>
+        </div>
+        <div id="bubble" class="bubble" aria-hidden="true">♥</div>
+        <div id="glass" class="milk-glass" aria-hidden="true"></div>
+        <div id="claw" class="claw" aria-hidden="true">///</div>
+      </div>
+      <div class="panel">
+        <div id="message" class="message" role="status" aria-live="polite">Salut ! Je suis Mino. Touche-moi ! 🐾</div>
+        <div class="controls">
+          <button class="control" data-button="milk" aria-label="Donner du lait"><span class="emoji">🥛</span> Lait</button>
+          <button class="control" data-button="tickle" aria-label="Chatouiller Mino"><span class="emoji">😹</span> Chatouille</button>
+          <button class="control" data-button="scratch" aria-label="Faire griffer Mino"><span class="emoji">🐾</span> Griffe</button>
+        </div>
+        <button id="record" class="record"><span class="mic">🎙️</span><span id="record-label">Parler à Mino</span></button>
+      </div>
+    </section>
+  </main>
+  <script>
+    (() => {
+      'use strict';
+      const cat = document.getElementById('cat');
+      const message = document.getElementById('message');
+      const bubble = document.getElementById('bubble');
+      const glass = document.getElementById('glass');
+      const claw = document.getElementById('claw');
+      const recordBtn = document.getElementById('record');
+      const recordLabel = document.getElementById('record-label');
+      let audioCtx, recorder, micStream, timeout, chunks = [], recording = false, playing = false, playSource;
+      const temp = new Map();
+      function say(s) { message.textContent = s; }
+      function animate(el, cls, ms) {
+        clearTimeout(temp.get(el));
+        el.classList.remove(cls); void el.offsetWidth;
+        el.classList.add(cls);
+        temp.set(el, setTimeout(() => el.classList.remove(cls), ms));
+      }
+      function pop(icon) { bubble.textContent=icon; animate(bubble, 'show', 950); }
+      function context() {
+        if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC(); }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+        return audioCtx;
+      }
+      function sound(kind) {
+        const c=context(); if (!c) return;
+        const t=c.currentTime;
+        const osc=c.createOscillator(), gain=c.createGain();
+        osc.connect(gain).connect(c.destination);
+        const cfg={meow:[430,710,.27,'triangle'],laugh:[540,330,.26,'sine'],hop:[280,600,.20,'sine'],tail:[210,140,.22,'triangle'],milk:[520,340,.24,'sine'],scratch:[190,80,.25,'sawtooth']}[kind]||[420,500,.2,'sine'];
+        osc.type=cfg[3]; osc.frequency.setValueAtTime(cfg[0],t); osc.frequency.exponentialRampToValueAtTime(cfg[1],t+cfg[2]);
+        gain.gain.setValueAtTime(.0001,t); gain.gain.exponentialRampToValueAtTime(.07,t+.02); gain.gain.exponentialRampToValueAtTime(.0001,t+cfg[2]);
+        osc.start(t); osc.stop(t+cfg[2]+.01);
+      }
+      function act(type) {
+        if (playing) return;
+        if (type==='head') { animate(cat,'wag',800); pop('♥');say('Miaou ! Encore une caresse !');sound('meow'); }
+        else if(type==='belly'||type==='tickle') { animate(cat,'tickle',570);pop('😹');say('Hihihi ! Ça chatouille !');sound('laugh'); }
+        else if(type==='paws') { animate(cat,'hop',780);pop('✨');say('Hop ! Attrape-moi si tu peux !');sound('hop'); }
+        else if(type==='tail') { animate(cat,'wag',1100);pop('⁉️');say('Hé ! Pas ma queue !');sound('tail'); }
+        else if(type==='milk') { animate(cat,'milk',1650);animate(glass,'show',1600);pop('🥛');say('Mmmh… un bon verre de lait !');sound('milk'); }
+        else if(type==='scratch') { animate(cat,'scratch',890);animate(claw,'show',800);pop('😼');say('Griffe, griffe !');sound('scratch'); }
+      }
+      cat.addEventListener('click', e => { const el=e.target.closest('[data-action]'); if(el) act(el.dataset.action); });
+      cat.addEventListener('keydown',e => { const el=e.target.closest('[data-action]'); if(el && (e.key==='Enter'||e.key===' ')){e.preventDefault();act(el.dataset.action);} });
+      document.querySelectorAll('[data-button]').forEach(b => b.addEventListener('click',()=>act(b.dataset.button)));
+
+      function releaseMic(){ if(micStream){micStream.getTracks().forEach(t=>t.stop()); micStream=null;} }
+      function resetRecord(){ recording=false; recordBtn.classList.remove('recording');recordBtn.disabled=false;recordLabel.textContent='Parler à Mino';clearTimeout(timeout); }
+      async function startRecord() {
+        if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder==='undefined') { say('Le micro n’est pas pris en charge ici. Essaie Chrome ou Safari récent.');return; }
+        recordBtn.disabled=true; say('Autorise le micro pour que Mino puisse t’écouter…');
+        try {
+          context();
+          micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});
+          chunks=[];
+          const formats=['audio/webm;codecs=opus','audio/mp4','audio/webm'];
+          const selected=formats.find(f=>MediaRecorder.isTypeSupported(f));
+          recorder=selected ? new MediaRecorder(micStream,{mimeType:selected}) : new MediaRecorder(micStream);
+          recorder.ondataavailable=e=>{ if(e.data?.size)chunks.push(e.data); };
+          recorder.onerror=()=>{releaseMic();resetRecord();say('Oups, l’enregistrement a échoué. On réessaie ?');};
+          recorder.onstop=async()=>{
+            releaseMic();
+            if(!chunks.length){resetRecord();say('Je n’ai rien entendu. Réessaie !');return;}
+            const blob=new Blob(chunks,{type:recorder.mimeType||'audio/webm'});
+            resetRecord();recordBtn.disabled=true;
+            await repeatVoice(blob);
+            recordBtn.disabled=false;
+          };
+          recorder.start(100);
+          recording=true;recordBtn.disabled=false;recordBtn.classList.add('recording');recordLabel.textContent='Terminer et écouter';
+          say('🎙️ Je t’écoute… Parle, puis réappuie !');
+          timeout=setTimeout(stopRecord,9000);
+        } catch(e) { releaseMic();resetRecord();say(e?.name==='NotAllowedError' ? 'Micro refusé. Autorise-le dans les réglages du navigateur.' : 'Impossible d’ouvrir le micro sur cet appareil.'); }
+      }
+      function stopRecord() {
+        if(!recording)return;
+        recording=false;clearTimeout(timeout);say('Un instant… Mino prépare sa réponse !');
+        recordBtn.classList.remove('recording');recordBtn.disabled=true;recordLabel.textContent='Mino réfléchit…';
+        if(recorder && recorder.state!=='inactive') recorder.stop(); else {releaseMic();resetRecord();}
+      }
+      async function repeatVoice(blob) {
+        playing=true;cat.classList.add('talking');say('🐱 Mino répète ce que tu viens de dire !');
+        try {
+          const c=context(); if(!c)throw Error('AudioContext unavailable');
+          const data=await blob.arrayBuffer();
+          const buffer=await c.decodeAudioData(data);
+          const source=c.createBufferSource(); playSource=source;
+          source.buffer=buffer;source.playbackRate.value=1.35;
+          source.connect(c.destination);
+          await c.resume();
+          await new Promise(resolve=>{source.onended=resolve;source.start();});
+        } catch(e) {
+          try {
+            const url=URL.createObjectURL(blob), audio=new Audio(url);
+            audio.playbackRate=1.35;audio.preservesPitch=false;audio.mozPreservesPitch=false;audio.webkitPreservesPitch=false;
+            await audio.play();
+            await new Promise(resolve=>{audio.onended=resolve;audio.onerror=resolve;});
+            URL.revokeObjectURL(url);
+          }catch(err){say('Lecture impossible sur ce navigateur. Essaie Chrome ou Safari récent.');}
+        } finally {playSource=null;playing=false;cat.classList.remove('talking');if(message.textContent.includes('répète')) say('Encore ? Je suis tout ouïe ! 🎙️');recordLabel.textContent='Parler à Mino';}
+      }
+      recordBtn.addEventListener('click',()=>{if(recording)stopRecord();else if(!recordBtn.disabled && !playing)startRecord();});
+      window.addEventListener('pagehide',()=>{releaseMic();if(playSource)try{playSource.stop();}catch(e){};});
+    })();
+  </script>
+</body>
+</html>
