@@ -68,9 +68,9 @@ La version historique n'utilise pas de bibliothèque JavaScript. La version 3D u
 
 Ce dépôt est public. Aucun droit de réutilisation n'est accordé par défaut au-delà de la consultation ; nous pourrons choisir une licence explicite plus tard.
 
-## MINO 0.3 — vraie 3D temps réel
+## MINO 0.4 — vraie 3D temps réel
 
-Une scène WebGL indépendante est disponible dans [3d/](./3d/). Le modèle original de MINO a été retravaillé : tête féline aux grosses joues, yeux verts, oreilles latérales, pattes plus naturelles, textures de fourrure et petit décor de ruelle.
+Une scène WebGL indépendante est disponible dans [3d/](./3d/). Le modèle original de MINO évolue : une tête et des joues sculptées dans un maillage continu, des oreilles plus courtes, des yeux verts, des membres affinés et un pelage clair intégré à la géométrie, dans une petite ruelle. Les interactions et la voix sont préservées.
 Elle utilise Three.js **0.180.0** (licence MIT dans `3d/vendor/`) et un chat en vraie géométrie 3D : tête, bras, pattes, queue, yeux et bouche sont animables séparément.
 
 Après `git pull origin main` et `py -m http.server 8000` :

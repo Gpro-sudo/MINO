@@ -34,15 +34,11 @@ export function createMino(THREE, renderer, scene) {
   const faceCoat = fur('#8c8586');
   const shadowCoat = fur('#746f71');
   const softCoat = fur('#a49b99');
-  const muzzleCoat = fur('#bcb0aa');
-  const bellyCoat = fur('#b6aba5');
   const earPink = new THREE.MeshStandardMaterial({color:'#b9787d',roughness: .96,side: THREE.DoubleSide});
   const earShadow = new THREE.MeshStandardMaterial({color:'#91676c',roughness: .94});
   const nosePink = new THREE.MeshPhysicalMaterial({color:'#d78e94',roughness:.4,clearcoat:.22,clearcoatRoughness:.5});
-  const nostril = new THREE.MeshStandardMaterial({color:'#965e68',roughness:.89});
-  const ink = new THREE.MeshStandardMaterial({color:'#372f35',roughness:.9});
   const crease = new THREE.MeshStandardMaterial({color:'#5c5355',roughness:1});
-  const eyeOutline = new THREE.MeshStandardMaterial({color:'#4c464b',roughness:1});
+  const eyeOutline = new THREE.MeshStandardMaterial({color:'#71696a',roughness:1});
   const eyeWhite = new THREE.MeshPhysicalMaterial({color:'#fff9f2',roughness:.24,clearcoat:.42});
   const irisMaterial = new THREE.MeshPhysicalMaterial({color:'#398a46',roughness:.28,clearcoat:.55});
   const irisOuter = new THREE.MeshStandardMaterial({color:'#1b5130',roughness:.6});
@@ -107,11 +103,27 @@ export function createMino(THREE, renderer, scene) {
     new THREE.Vector2(.39,1.96),new THREE.Vector2(.26,2.13),
     new THREE.Vector2(.0,2.20)
   ]);
-  const body = new THREE.Mesh(new THREE.LatheGeometry(bodyOutline.getPoints(100), 56), coat);
+  const bodyGeometry = new THREE.LatheGeometry(bodyOutline.getPoints(100), 56);
+  // The pale belly is painted into the vertices of the same continuous body.
+  // It cannot intersect the torso or create a floating white oval.
+  const bodyColors=[];
+  const baseBodyColor=new THREE.Color('#837d7e');
+  const chestColor=new THREE.Color('#b5aaa4');
+  const bodyPoints=bodyGeometry.attributes.position;
+  for(let i=0;i<bodyPoints.count;i++){
+    const x=bodyPoints.getX(i),y=bodyPoints.getY(i),z=bodyPoints.getZ(i);
+    const radius=Math.max(.01,Math.hypot(x,z));
+    const front=Math.max(0,z/radius);
+    const vertical=THREE.MathUtils.smoothstep(y,.68,1.04)*(1-THREE.MathUtils.smoothstep(y,1.73,1.99));
+    const center=THREE.MathUtils.smoothstep(front,.38,.86);
+    const blend=.85*vertical*center;
+    const c=baseBodyColor.clone().lerp(chestColor,blend);
+    bodyColors.push(c.r,c.g,c.b);
+  }
+  bodyGeometry.setAttribute('color',new THREE.Float32BufferAttribute(bodyColors,3));
+  const bodyFur=coat.clone();bodyFur.color.set('#ffffff');bodyFur.vertexColors=true;
+  const body = new THREE.Mesh(bodyGeometry,bodyFur);
   body.scale.z = .86;body.castShadow=true;body.receiveShadow=true;torso.add(body);
-  // Small, soft chest marking — part of the coat, not a giant white plastic plate.
-  blob(torso, bellyCoat, [0,1.35,.49], [.34,.61,.048], false);
-  blob(torso, muzzleCoat, [0,1.91,.35], [.23,.26,.06], false);
 
   for (const s of [-1, 1]) {
     const leg = new THREE.Group();leg.position.set(s * .34,.87,-.03);root.add(leg);
@@ -130,8 +142,8 @@ export function createMino(THREE, renderer, scene) {
   for (const s of [-1,1]) {
     const arm=new THREE.Group();arm.position.set(s*.49,1.91,-.09);root.add(arm);
     skinTube(arm, [[0,.15,0],[s*.16,-.17,-.035],[s*.29,-.50,.045],[s*.26,-.85,.14]],
-      [.15,.255,.235,.13],faceCoat);
-    const paw=blob(arm,faceCoat,[s*.26,-.83,.145],[.225,.17,.23]);
+      [.14,.208,.200,.115],faceCoat);
+    const paw=blob(arm,faceCoat,[s*.26,-.83,.145],[.185,.145,.193]);
     paw.rotation.z=-s*.22;
     for(const x of [-.065,.065]){
       line(arm,[[s*.26+x,-.937,.315],[s*.26+x,-.885,.355],[s*.26+x,-.843,.356]],.006,crease,10);
@@ -139,18 +151,40 @@ export function createMino(THREE, renderer, scene) {
     arms.push(arm);
   }
 
-  // Broad feline head with integrated jowls, set lower than the old cone ears.
+  // Sculpt the cheeks and chin from a SINGLE contiguous mesh. Separate cheek
+  // spheres created the severe black self-shadows in the previous screenshot.
   const head=new THREE.Group();head.position.set(0,2.39,.09);root.add(head);
-  blob(head,faceCoat,[0,.06,0],[.82,.69,.65]);
-  for(const s of [-1,1]){
-    blob(head,faceCoat,[s*.55,-.20,.18],[.36,.37,.43]);
+  const faceGeometry=new THREE.SphereGeometry(1,80,64);
+  const facePositions=faceGeometry.attributes.position;
+  const faceColors=[];
+  const baseFaceColor=new THREE.Color('#8c8586');
+  const cheekColor=new THREE.Color('#aea39e');
+  for(let i=0;i<facePositions.count;i++){
+    const nx=facePositions.getX(i),ny=facePositions.getY(i),nz=facePositions.getZ(i);
+    const cheek=Math.exp(-Math.pow((ny+.32)/.34,2));
+    const upperMuzzle=Math.exp(-Math.pow((ny+.43)/.29,2));
+    const bulge=Math.max(0,nz)*upperMuzzle;
+    const x=nx*.79*(1+.26*cheek);
+    const y=.06+ny*.69;
+    const z=nz*.65 + .125*bulge;
+    facePositions.setXYZ(i,x,y,z);
+    const front=THREE.MathUtils.smoothstep(nz,.34,.88);
+    const cream=.62*upperMuzzle*front + .22*Math.exp(-Math.pow((ny+.72)/.22,2))*front;
+    const c=baseFaceColor.clone().lerp(cheekColor,Math.min(.8,cream));
+    faceColors.push(c.r,c.g,c.b);
   }
-  blob(head,faceCoat,[0,-.39,.20],[.58,.30,.43]);
+  faceGeometry.setAttribute('color',new THREE.Float32BufferAttribute(faceColors,3));
+  faceGeometry.computeVertexNormals();
+  const sculptedFur=faceCoat.clone();sculptedFur.color.set('#ffffff');sculptedFur.vertexColors=true;
+  const face=new THREE.Mesh(faceGeometry,sculptedFur);
+  face.castShadow=true;face.receiveShadow=true;head.add(face);
 
   // Ears lean sideways as in classic 2010-style silhouettes.
   function ear(side){
     const earGroup=new THREE.Group();earGroup.position.set(side*.63,.42,-.15);
-    earGroup.scale.x=side;head.add(earGroup);
+    earGroup.scale.set(side*1.05,.56,1);
+    earGroup.rotation.z=-side*.17;
+    head.add(earGroup);
     const outline=new THREE.Shape();
     outline.moveTo(-.21,-.07);
     outline.bezierCurveTo(-.26,.13,-.27,.41,-.19,.49);
@@ -177,7 +211,7 @@ export function createMino(THREE, renderer, scene) {
 
   for(const s of [-1,1]){
     const eye=new THREE.Group();eye.position.set(s*.328,.135,.578);eye.rotation.z=-s*.06;head.add(eye);
-    blob(eye,eyeOutline,[0,0,-.005],[.235,.276,.09],false);
+    blob(eye,eyeOutline,[0,0,-.005],[.224,.258,.088],false);
     blob(eye,eyeWhite,[0,0,.012],[.216,.251,.094],false);
     blob(eye,irisOuter,[-s*.012,-.018,.108],[.153,.172,.028],false);
     blob(eye,irisMaterial,[-s*.012,-.018,.134],[.137,.158,.024],false);
@@ -186,16 +220,14 @@ export function createMino(THREE, renderer, scene) {
     blob(eye,catchlight,[-.055,.075,.180],[.048,.054,.009],false);
     blob(eye,catchlight,[.060,-.088,.176],[.020,.022,.008],false);
     if(s===-1)head.userData.leftEye=eye;else head.userData.rightEye=eye;
-    line(head,[[s*.11,.405,.625],[s*.33,.455,.619],[s*.55,.383,.525]],.025,shadowCoat,18);
+    line(head,[[s*.12,.396,.616],[s*.33,.417,.620],[s*.54,.364,.515]],.013,shadowCoat,18);
 
-    // The two small cream pads sit within broad grey cheeks.
-    blob(head,muzzleCoat,[s*.197,-.315,.60],[.28,.17,.158],false);
     for (const [x,y] of [[.31,-.29],[.40,-.34],[.29,-.38]]){
-      blob(head,crease,[s*x,y,.722-Math.abs(x-.29)*.4],[.008,.008,.005],false);
+      blob(head,crease,[s*x,y,.642-Math.abs(x-.29)*.35],[.007,.007,.004],false);
     }
     for (let j=-1;j<=1;j++){
       const y=-.303+j*.055;
-      line(head,[[s*.45,y,.675],[s*.73,y+j*.044,.65],[s*1.11,y+j*.093,.56]],.0037,whiskerMaterial,18);
+      line(head,[[s*.45,y,.615],[s*.73,y+j*.044,.64],[s*1.11,y+j*.093,.56]],.0037,whiskerMaterial,18);
     }
   }
 
@@ -210,12 +242,11 @@ export function createMino(THREE, renderer, scene) {
     bevelSegments:4,curveSegments:20
   }),nosePink);
   nose.position.set(0,-.195,.759);nose.castShadow=true;head.add(nose);
-  blob(head,nostril,[-.087,-.17,.827],[.025,.015,.006],false);
-  blob(head,nostril,[.087,-.17,.827],[.025,.015,.006],false);
-  line(head,[[0,-.323,.790],[0,-.397,.782]],.011,lipMaterial,12);
-  line(head,[[-.217,-.404,.705],[-.12,-.451,.746],[0,-.416,.78],[.12,-.451,.746],[.217,-.404,.705]],.013,lipMaterial);
-  const mouth=blob(head,lipMaterial,[0,-.445,.747],[.12,.012,.024],false);
-  const tongue=blob(head,tongueMaterial,[0,-.491,.778],[.063,.014,.012],false);
+  blob(head,catchlight,[-.053,-.163,.835],[.027,.012,.004],false);
+  line(head,[[0,-.317,.756],[0,-.384,.662]],.011,lipMaterial,12);
+  line(head,[[-.214,-.411,.579],[-.12,-.452,.625],[0,-.416,.652],[.12,-.452,.625],[.214,-.411,.579]],.012,lipMaterial);
+  const mouth=blob(head,lipMaterial,[0,-.442,.63],[.12,.012,.025],false);
+  const tongue=blob(head,tongueMaterial,[0,-.486,.645],[.063,.014,.012],false);
 
   // A few very soft forehead stripes make MINO a tabby without "stick-on" blocks.
   for(const x of [-.20,0,.20]){

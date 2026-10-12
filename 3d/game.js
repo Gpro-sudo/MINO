@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three.module.min.js';
-import {createMino} from './mino-model.js';
+import {createMino} from './mino-model.js?v=4';
 
 // MINO 3D — an original animated, procedural feline in real-time 3D.
 const canvas = document.querySelector('#scene');
