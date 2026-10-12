@@ -1,58 +1,65 @@
 # MINO 🐱 — Le petit chat rétro
 
-Un mini-jeu de chat parlant pour retrouver le charme des premières applications mobiles de 2010.
+Mini-jeu de chat parlant inspiré de l'ambiance des premières applications mobiles de 2010.
 
-**[Essayer le prototype privé](https://mino-retro-2010.kwmxworh2760802.chatgpt.site)**
+**[Tester la dernière version privée](https://mino-retro-2010.kwmxworh2760802.chatgpt.site)**
 
-> Projet indépendant : MINO est un personnage original, non affilié à Talking Tom ou Outfit7.
+> MINO est un personnage original, indépendant de Talking Tom et d'Outfit7.
 
-## Fonctionnalités — version 0.1
+## Version 0.2 — refonte visuelle
 
-- Chat interactif dessiné en SVG avec animations.
-- Réactions au toucher de la tête, du ventre, des pattes et de la queue.
-- Boutons **Lait**, **Chatouille** et **Griffe**.
-- Enregistrement au micro d'une courte phrase, puis répétition en voix aiguë.
-- Interface adaptée au mobile et à l'ordinateur.
-- Aucun compte, aucune publicité, aucun envoi de la voix vers un serveur.
+- Personnage au rendu 3D pré-calculé, avec textures de pelage, clignements et bouche animée.
+- Ruelle en 3D pré-calculée.
+- Réactions quand on touche la tête, le ventre, les pattes et la queue.
+- Boutons Lait, Chatouille et Griffe.
+- Répétition vocale plus aiguë (micro autorisé uniquement après action).
+- Adapté à l'ordinateur et au téléphone, sans publicité ni compte.
+- Les enregistrements restent dans ton navigateur.
 
-## Installation sur Windows
+Le jeu est toujours en **2D animée à partir d'images 3D**, pas encore un modèle 3D temps réel. C'est un prototype rapide pour valider le style et les interactions.
 
-Si ton dossier `D:\07-Logiciels\37-MINO` est **vide**, ouvre PowerShell :
+## Installer dans ton dossier Windows
 
-```powershell
-Set-Location 'D:\07-Logiciels\37-MINO'
-git clone https://github.com/Gpro-sudo/MINO.git .
-```
-
-Puis démarre un serveur local (Python requis) :
+Si tu as déjà cloné le dépôt :
 
 ```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
 py -m http.server 8000
 ```
 
-Ouvre **http://localhost:8000** dans Chrome ou Edge, puis autorise le micro lorsque le jeu le demande.
+Puis ouvre [http://localhost:8000](http://localhost:8000).
 
-Si ton dossier contient déjà des fichiers, vérifie-les avant de cloner : la commande ci-dessus nécessite un dossier vide.
+Si tu n'as pas encore cloné et que le dossier est vide :
 
-Tu peux ouvrir `index.html` directement pour voir les animations, mais le micro fonctionne mieux sur `localhost` ou HTTPS.
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git clone https://github.com/Gpro-sudo/MINO.git .
+```
 
-## Structure
+Pour le micro, utilise un serveur `localhost` ou un site HTTPS. La commande `py` nécessite Python.
+
+## Fichiers
 
 ```text
 MINO/
-├── index.html    # Tout le prototype : interface, SVG, animations et sons
-└── README.md     # Ce guide
+├── index.html          # Interface, interactions, animations et audio
+├── assets/
+│   ├── alley.webp      # Ruelle texturée
+│   ├── mino-idle.webp  # Position normale
+│   ├── mino-talk.webp  # Bouche ouverte
+│   └── mino-blink.webp # Yeux fermés
+└── README.md
 ```
 
-Aucune dépendance n'est nécessaire pour cette première version.
+Aucune bibliothèque JavaScript n'est requise. Les sprites et le décor sont des images optimisées WebP.
 
-## Suite du projet
+## Ensuite
 
-1. Tester le micro sur Android, iPhone et PC.
-2. Améliorer les animations et les expressions.
-3. Ajouter des sons originaux et des interactions surprises.
-4. Envisager une application Android installable (APK).
+- Tester le microphone et l'animation de bouche sur plusieurs appareils.
+- Ajouter davantage d'expressions, de poses et de sons originaux.
+- Évaluer une vraie version 3D animée ou une application Android.
 
 ## Licence
 
-Ce dépôt est public. Le code et les graphismes constituent un prototype de travail ; aucune licence de réutilisation n'est accordée par défaut.
+Ce dépôt est public. Aucun droit de réutilisation n'est accordé par défaut au-delà de la consultation ; nous pourrons choisir une licence explicite plus tard.

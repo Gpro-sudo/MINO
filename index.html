@@ -32,14 +32,33 @@
     .brand span { color: #f2d49d; font-size: 9px; text-transform: uppercase; letter-spacing: 3px; font-weight: 900; margin-bottom: 2px; }
     .brand strong { font-size: 39px; font-weight: 1000; letter-spacing: -3px; line-height: 1; color: #fff2d8; text-shadow: 2px 3px #2a3039; }
     .year { color: #f3dfbc; border: 1px solid #acaa9b9a; background: #323b4399; border-radius: 50px; padding: 7px 10px; font-size: 10px; font-weight: 900; letter-spacing: 1.2px; }
-    .stage { position: absolute; top: 0; bottom: 170px; left: 0; right: 0; overflow: hidden; background-color: #9c7f6b; background-image: linear-gradient(#fff0 0 94%, #5c4b4170 95% 100%), repeating-linear-gradient(0deg, #0000 0 64px, #6f554980 65px 67px), repeating-linear-gradient(90deg, #0000 0 110px, #5d4a4070 111px 114px); background-size: 100% 100%, 100% 100%, 230px 100%; }
-    .stage::before { content: ''; position: absolute; inset: 0 0 20%; pointer-events: none; background: radial-gradient(ellipse at 50% 34%, #e4cbb193 0%, #dbbaa033 46%, #2a211c6b 100%); z-index: 1; }
-    .stage::after { content: ''; position: absolute; bottom: -3px; left: -15%; width: 130%; height: 30%; background: repeating-linear-gradient(95deg,#584c45 0 2px,#0000 3px 80px), repeating-linear-gradient(0deg,#0000 0 58px,#4d4439 59px 63px), linear-gradient(#8f8271,#62584f); transform: perspective(200px) rotateX(25deg); transform-origin: bottom; box-shadow: 0 -13px 15px #362a2455; z-index: 2; }
-    .poster { position: absolute; top: 25%; left: 9%; transform: rotate(-11deg); color: #423f39; opacity: .35; border: 2px dashed #504639; padding: 4px 8px; font-family: Georgia, serif; font-weight: 900; font-size: 10px; letter-spacing: 2px; z-index: 1; }
-    .wall-crack { position: absolute; right: 12%; top: 22%; width: 40px; height: 75px; border-left: 2px solid #4a403d56; transform: rotate(13deg); z-index: 1; clip-path: polygon(0 0,100% 0,100% 100%,0 100%); }
+    .stage { position: absolute; top: 0; bottom: 170px; left: 0; right: 0; overflow: hidden; background-color: #a86b45; background-image: url('assets/alley.webp'); background-size: cover; background-position: center bottom; }
+    .stage::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to bottom,#1f252b3b,transparent 28%,transparent 75%,#31251e31); z-index: 1; }
+    .stage::after { content: none; }
+    .poster { display:none; position: absolute; top: 25%; left: 9%; transform: rotate(-11deg); color: #423f39; opacity: .35; border: 2px dashed #504639; padding: 4px 8px; font-family: Georgia, serif; font-weight: 900; font-size: 10px; letter-spacing: 2px; z-index: 1; }
+    .wall-crack { display:none; position: absolute; right: 12%; top: 22%; width: 40px; height: 75px; border-left: 2px solid #4a403d56; transform: rotate(13deg); z-index: 1; clip-path: polygon(0 0,100% 0,100% 100%,0 100%); }
     .wall-crack::after { content:''; position:absolute; top: 34px; left: -1px; width: 34px; height: 30px; border-top: 2px solid #4a403d56; transform:rotate(-25deg); }
-    .cat-holder { position: absolute; z-index: 4; width: min(98%, 470px); height: min(80%, 540px); left: 50%; bottom: 1%; transform: translateX(-50%); filter: drop-shadow(0 11px 7px #34261c75); }
-    .cat-holder svg { width: 100%; height: 100%; overflow: visible; user-select: none; -webkit-user-select: none; }
+    .cat-holder { position: absolute; z-index: 4; width: 100%; height: min(95%, 630px); left: 50%; bottom: -1%; transform: translateX(-50%); filter: drop-shadow(0 10px 6px #34261c45); }
+    .cat-holder svg { display:none; }
+    .cat-visual { position:absolute; inset:0; transform-origin:center 84%; animation: catBreathe 3.7s ease-in-out infinite; }
+    .cat-frame { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:center bottom; user-select:none; pointer-events:none; }
+    .talk-frame { opacity:0; }
+    .blink-frame { opacity:0; animation: eyeBlink 6.6s steps(1,end) infinite; }
+    .cat-holder.talking .talk-frame { animation: mouthFrames .22s steps(1,end) infinite; }
+    .cat-holder.talking .blink-frame { animation:none; opacity:0; }
+    .cat-holder.tickle .cat-visual { animation: wobble .55s ease-in-out; }
+    .cat-holder.hop .cat-visual { animation: hop .75s cubic-bezier(.2,.6,.5,1); }
+    .cat-holder.wag .cat-visual { animation: wag .16s ease-in-out 7 alternate; }
+    .cat-holder.scratch .cat-visual { animation: headTilt .18s ease-in-out 6 alternate; }
+    .cat-holder.milk .cat-visual { animation: sip .22s ease-in-out 7 alternate; }
+    .touch-zone { position:absolute; z-index:5; border:0; background:transparent; border-radius:50%; touch-action:manipulation; cursor:pointer; color:transparent; }
+    .touch-head { left:19%; top:2%; width:62%; height:42%; }
+    .touch-belly { left:34%; top:49%; width:35%; height:28%; }
+    .touch-tail { left:6%; top:46%; width:25%; height:31%; }
+    .touch-paws { left:24%; bottom:0; width:55%; height:19%; }
+    @keyframes catBreathe { 0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.012,1.007)} }
+    @keyframes mouthFrames {0%,48%{opacity:0}50%,100%{opacity:1}}
+    @keyframes eyeBlink {0%,40%,42%,69%,71%,100%{opacity:0}41%,70%{opacity:1}}
     .hotspot { cursor: pointer; }
     .hotspot:hover { filter: brightness(1.05); }
     #cat-root { transform-origin: 50% 95%; }
@@ -66,7 +85,7 @@
     @keyframes scratch { from{transform:rotate(0)}to{transform:rotate(-30deg) translate(-13px,-14px)} }
     @keyframes wag { from{transform:rotate(-13deg)}to{transform:rotate(18deg)} }
     @keyframes sip { from{transform:rotate(0)}to{transform:rotate(7deg)} }
-    .floor-shadow { position: absolute; z-index: 3; width: 55%; height: 21px; left: 23%; bottom: 2.5%; background: #251b18a3; border-radius: 50%; filter: blur(11px); }
+    .floor-shadow { position: absolute; z-index: 3; width: 55%; height: 19px; left: 23%; bottom: 2%; background: #251b187a; border-radius: 50%; filter: blur(11px); }
     .bubble { position: absolute; z-index: 7; top: 28%; left: 50%; transform: translate(-50%, 12px) scale(.8); background: #fff9df; border: 3px solid #2c3239; border-radius: 50%; width: 76px; height: 76px; display: grid; place-items: center; font-size: 38px; box-shadow: 5px 5px 0 #26272780; opacity: 0; pointer-events: none; }
     .bubble.show { animation: pop .95s cubic-bezier(.2,.8,.2,1) forwards; }
     @keyframes pop { 0%{opacity:0;transform:translate(-50%,15px) scale(.5)}25%{opacity:1;transform:translate(-50%,-15px) scale(1.1)}72%{opacity:1;transform:translate(-50%,-21px) scale(1)}100%{opacity:0;transform:translate(-50%,-35px) scale(.9)} }
@@ -97,7 +116,7 @@
       .phone { width:100vw; max-width:500px; height:100svh; min-height:0; border:0; border-radius:0; margin:0 auto; box-shadow:none; }
       .game-top { padding-top: max(22px, env(safe-area-inset-top, 0px)); }
       .stage { bottom:170px; }
-      .cat-holder { height:min(80%,590px); }
+      .cat-holder { height:min(95%,650px); }
       .panel { height:180px; }
     }
     @media (max-height:700px) { .game-top { height:85px;padding-top:16px } .brand strong { font-size:31px; } .stage{bottom:155px} .panel{height:155px;padding-top:7px} .panel .message{height:20px} .control{min-height:45px}.record{min-height:48px;margin-top:7px}.cat-holder{height:80%} }
@@ -123,6 +142,11 @@
       <div class="stage">
         <div class="poster">MEOW<br>CLUB</div><div class="wall-crack"></div><div class="floor-shadow"></div>
         <div id="cat" class="cat-holder">
+          <div class="cat-visual" aria-hidden="true">
+            <img class="cat-frame idle-frame" src="assets/mino-idle.webp" alt="">
+            <img class="cat-frame blink-frame" src="assets/mino-blink.webp" alt="">
+            <img class="cat-frame talk-frame" src="assets/mino-talk.webp" alt="">
+          </div>
           <svg viewBox="0 0 400 540" aria-label="Mino, un chat gris interactif" role="img">
             <defs>
               <radialGradient id="fur" cx="38%" cy="28%" r="75%"><stop offset="0" stop-color="#b5b5ae"/><stop offset=".53" stop-color="#868782"/><stop offset="1" stop-color="#494f51"/></radialGradient>
@@ -180,6 +204,10 @@
               <ellipse cx="165" cy="503" rx="42" ry="20" fill="url(#fur)" stroke="#535b59" stroke-width="3"/><ellipse cx="235" cy="503" rx="42" ry="20" fill="url(#fur)" stroke="#535b59" stroke-width="3"/>
             </g>
           </svg>
+          <button type="button" class="touch-zone touch-head" data-action="head" aria-label="Caresser la tête de Mino"></button>
+          <button type="button" class="touch-zone touch-belly" data-action="belly" aria-label="Chatouiller le ventre de Mino"></button>
+          <button type="button" class="touch-zone touch-tail" data-action="tail" aria-label="Toucher la queue de Mino"></button>
+          <button type="button" class="touch-zone touch-paws" data-action="paws" aria-label="Toucher les pattes de Mino"></button>
         </div>
         <div id="bubble" class="bubble" aria-hidden="true">♥</div>
         <div id="glass" class="milk-glass" aria-hidden="true"></div>
