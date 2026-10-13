@@ -26,29 +26,12 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host ''
 Write-Host 'Etape 2 : verification du calcul GPU CUDA (une petite operation seulement).' -ForegroundColor Cyan
-$check = @'
-import sys
-try:
-    import torch
-    import torchvision
-    print("PyTorch :", torch.__version__)
-    print("Torchvision :", torchvision.__version__)
-    print("CUDA de PyTorch :", torch.version.cuda)
-    if not torch.cuda.is_available():
-        raise RuntimeError("PyTorch ne detecte pas CUDA. Arret avant Stable Fast 3D.")
-    print("GPU :", torch.cuda.get_device_name(0))
-    x = torch.tensor([2.0, 3.0], device="cuda")
-    y = (x * x).sum()
-    torch.cuda.synchronize()
-    print("Test GPU :", y.item(), "(attendu : 13.0)")
-    if y.item() != 13.0:
-        raise RuntimeError("Resultat GPU incorrect")
-    print("MINO CUDA : TEST REUSSI")
-except Exception as e:
-    print("MINO CUDA : TEST ECHEC -", repr(e))
-    sys.exit(1)
-'@
-& $python -c $check
+$test = Join-Path $PSScriptRoot 'test_cuda.py'
+if (-not (Test-Path -LiteralPath $test -PathType Leaf)) {
+    Write-Host '[MINO] test_cuda.py manquant : fais git pull origin main.' -ForegroundColor Red
+    exit 5
+}
+& $python $test
 if ($LASTEXITCODE -ne 0) {
     Write-Host '[MINO] PyTorch installe, mais CUDA doit etre corrige avant de poursuivre.' -ForegroundColor Red
     exit 4
