@@ -52,7 +52,7 @@ Le script ne modifie rien : il localise `nvcc`, teste `cuda_runtime.h`, `cuda.h`
 
 ## Etape 2 : installer Stable Fast 3D (compilation Windows)
 
-Les derniers diagnostics confirment que le toolkit Conda de Pinokio possede `nvcc 12.8.93`, ses en-tetes, `Library/lib/cudart.lib` et `cudart_static.lib`. Le compilateur Microsoft Visual Studio 2022 est present. Les bibliotheques CUDA embarquees dans PyTorch sont en version 12.1, donc la compilation reste a valider.
+Les derniers diagnostics confirment que le toolkit Conda de Pinokio possede `nvcc 12.8.93`, ses en-tetes, `Library/lib/cudart.lib` et `cudart_static.lib`. Le compilateur Microsoft Visual Studio 2022 est present. Les bibliotheques CUDA embarquees dans PyTorch sont en version 12.1. Le 13 octobre 2026, les deux extensions natives ont ete compilees et importees avec succes sur la RTX 4060 Windows.
 
 Dans PowerShell :
 
@@ -73,14 +73,52 @@ Sous Windows, les deux compilations **restent experimentales**. En cas d'erreur,
 
 Les fichiers volumineux restent ignores par `.gitignore`. L'acces au modele lui-meme exige une demande d'autorisation sur [Hugging Face](https://huggingface.co/stabilityai/stable-fast-3d) ; ne jamais publier de jeton prive.
 
-## Etape 3 : autorisation du modele et premiere generation
+## Etape 3 : verifier le moteur SANS poids IA
 
-- [Stable Fast 3D — documentation officielle](https://github.com/Stability-AI/stable-fast-3d)
-- [Modele Hugging Face a acces controle](https://huggingface.co/stabilityai/stable-fast-3d)
-- [Guide d'installation CUDA Windows](https://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/)
+La compilation native de `texture_baker` et `uv_unwrapper` est maintenant **reussie** sur ce PC. Avant de telecharger les poids controles par Hugging Face, verifier que le moteur Python complet s'importe :
 
-Stable Fast 3D necessite des dependances Python et la bonne combinaison PyTorch/CUDA. L'installation Windows **reste experimentale** ; la documentation officielle estime environ 6 Gio de VRAM pour une image, ce qui laisse peu de marge sur une carte de 8 Gio. Verifier le CUDA Toolkit et le compilateur `nvcc` avant les extensions natives. Ne pas confondre la version CUDA affichee par `nvidia-smi` avec le CUDA Toolkit installe.
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+& '.\local3d\.venv-sf3d\Scripts\python.exe' '.\local3d\test_sf3d_runtime.py'
+```
 
-Le modele Hugging Face est a acces controle : il faudra demander son acces depuis le compte de l'utilisateur. Ne jamais enregistrer ni committer un jeton prive dans Git.
+Resultat vise : `MINO SF3D : TEST D IMPORT REUSSI`. Ce test ne telecharge rien.
 
-Le modele produit par l'IA ne disposera pas automatiquement des expressions faciales de MINO : les paupieres, la bouche et les mouvements d'oreilles resteront a travailler sous Blender.
+## Etape 4 : recuperer les poids autorises sur Hugging Face
+
+1. Se connecter au site [Hugging Face](https://huggingface.co/stabilityai/stable-fast-3d), demander et obtenir l'acces aux poids du modele.
+2. Creer si necessaire un [jeton personnel en lecture](https://huggingface.co/settings/tokens), uniquement depuis le site Hugging Face.
+3. Authentifier **localement** le Python MINO :
+
+```powershell
+& '.\local3d\.venv-sf3d\Scripts\huggingface-cli.exe' login
+```
+
+Saisir le token directement dans PowerShell (il peut ne pas s'afficher pendant la saisie). Si une question demande d'enregistrer le token dans Git, repondre non : ce n'est pas necessaire pour telecharger le modele. **Ne jamais copier le jeton dans GitHub ni dans la conversation.**
+
+Ensuite :
+
+```powershell
+& '.\local3d\.venv-sf3d\Scripts\python.exe' '.\local3d\telecharger_modele_sf3d.py'
+```
+
+Le script telecharge `config.yaml` et `model.safetensors` dans le dossier ignore par Git `local3d/models/stable-fast-3d/` et ne journalise aucun jeton. L'acces peut rester en attente ou etre refuse par le fournisseur ; la compilation locale ne donne pas automatiquement acces aux poids.
+
+## Etape 5 : premiere generation 3D locale (sans modifier le jeu MINO)
+
+Essai avec la photo de chaise fournie dans le depot officiel :
+
+```powershell
+& '.\local3d\generer_sf3d.cmd'
+```
+
+Si la generation reussit, ouvrir `local3d/output/test_chaise/0/mesh.glb` dans Blender.
+Puis, avec une illustration PNG **originale de MINO** (fond transparent recommande) :
+
+```powershell
+& '.\local3d\generer_sf3d.cmd' 'D:\chemin\vers\mino_reference.png'
+```
+
+Le resultat se trouve dans `local3d/output/mino/0/mesh.glb`. Ne pas remplacer automatiquement `3d/assets/mino_anim.glb` : l'export brut **n'a ni squelette ni animation faciale**. Il faut d'abord le verifier et l'adapter dans Blender. A la premiere conversion, `rembg` peut telecharger son propre petit modele de suppression du fond ; un acces internet est donc requis pour l'installation initiale et le premier passage. Les executions suivantes peuvent rester locales quand tous les fichiers sont presents.
+
