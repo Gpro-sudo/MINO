@@ -291,3 +291,17 @@ powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\diagnostic_compil
 ```
 
 Transmettre le resultat et les 30-50 dernieres lignes de l'erreur de `SaveGLBFile`. Le diagnostic affiche les chemins `ninja.exe`, `nvcc.exe`, `cl.exe`, la version nvcc, les variables CUDA et le `CUDA_HOME` que voit PyTorch 2.5.1+cu124. Selon le message precis, il faudra corriger les outils systeme detectes, pas le modele 3D.
+
+#### Erreur precise lieur Windows : LNK1181 cudart.lib
+
+Le journal de la premiere exportation complete rapporte `LINK : fatal error LNK1181: cannot open input file 'cudart.lib'`, apres compilation reussie de la plupart des sources C++/CUDA. La phase d'inference MINO est bonne : 274585 sommets, puis decimation a 13729 sommets. Le blocage est au moment de l'edition des liens de `nvdiffrast_plugin.pyd`, pas au chargement du modele.
+
+`CUDA_HOME` pointe sur `D:\pinokio\bin\miniforge\Library` (nvcc CUDA 12.8), tandis que les roues PyTorch ont ete compilees avec CUDA 12.4. La commande d'edition des liens cherche `cudart.lib` dans `Library\lib\x64`; ce fichier semble manquer a cet emplacement. Le diagnostic `diagnostic_compilation_glb.ps1` cherche maintenant explicitement `cudart.lib` parmi les chemins CUDA connus, la cache conda et le venv, sans modifier les logiciels.
+
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\diagnostic_compilation_glb.ps1'
+```
+
+Envoyer surtout le paragraphe `[6] Recherche de cudart.lib`. Selon le resultat, utiliser une bibliotheque de liaison CUDA 12.4 deja disponible, ou preparer son installation de developpement separee. Ne pas copier arbitrairement un `cudart.lib` depuis Internet et ne pas changer l'installation Pinokio.
