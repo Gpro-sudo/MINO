@@ -1,0 +1,11 @@
+# Environnements locaux et modeles IA volumineux : ne pas envoyer sur GitHub.
+local3d/.venv-sf3d/
+local3d/stable-fast-3d/
+local3d/output/
+local3d/models/
+local3d/.cache/
+*.safetensors
+.env
+.env.*
+__pycache__/
+*.pyc
