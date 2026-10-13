@@ -9,3 +9,4 @@ local3d/.cache/
 .env.*
 __pycache__/
 *.pyc
+local3d/inputs/
