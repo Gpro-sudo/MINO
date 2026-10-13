@@ -68,6 +68,24 @@ La version historique n'utilise pas de bibliothèque JavaScript. La version 3D u
 
 Ce dépôt est public. Aucun droit de réutilisation n'est accordé par défaut au-delà de la consultation ; nous pourrons choisir une licence explicite plus tard.
 
+## MINO 0.5 — modèle Blender (intégration en cours)
+
+Le jeu 3D dispose maintenant d'un chargeur glTF 2.0 natif via **Three.js GLTFLoader r180** (licence MIT). Le personnage Blender est importé depuis `3d/assets/mino_anim.glb`. Quand l'asset manque, la version procédurale 0.4 est conservée comme solution de secours.
+
+**Sur Windows, après génération de `blender/mino_anim.glb` :**
+
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+py blender/prepare_game_asset.py
+git add 3d/assets/mino_anim.glb
+git commit -m "feat: add original Blender MINO character"
+git push origin main
+py -m http.server 8000
+```
+
+Ouvrir **http://localhost:8000/3d/**. Le script corrige les pivots du GLB exporté, sans modifier les maillages. Les huit pistes de mouvements Blender sont ensuite rejouées avec `THREE.AnimationMixer`, et les interactions fonctionnent par-dessus. C'est un modèle de départ contrôlé par des pivots, et **non un squelette de déformation**. Tester le comportement visuel sur le PC utilisateur avant déploiement final.
+
 ## MINO 0.4 — vraie 3D temps réel
 
 Une scène WebGL indépendante est disponible dans [3d/](./3d/). Le modèle original de MINO évolue : une tête et des joues sculptées dans un maillage continu, des oreilles plus courtes, des yeux verts, des membres affinés et un pelage clair intégré à la géométrie, dans une petite ruelle. Les interactions et la voix sont préservées.

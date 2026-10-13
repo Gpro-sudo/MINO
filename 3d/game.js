@@ -1,7 +1,8 @@
 import * as THREE from './vendor/three.module.min.js';
 import {createMino} from './mino-model.js?v=4';
+import {GLTFLoader} from './vendor/GLTFLoader.js';
 
-// MINO 3D — an original animated, procedural feline in real-time 3D.
+// MINO — Blender GLB character in a real-time Three.js scene; procedural fallback if the model is unavailable.
 const canvas = document.querySelector('#scene');
 const viewport = document.querySelector('#viewport');
 const status = document.querySelector('#status');
@@ -125,7 +126,98 @@ function makeStreet() {
 }
 makeStreet();
 
-const cat=createMino(THREE,renderer,scene);
+// Keep the original character as a graceful fallback until the local Blender export loads.
+let cat=createMino(THREE,renderer,scene);
+let gltfMixer=null;
+
+function wrapAnimatedControl(object) {
+  // Retain the glTF animation tracks on their original named node.
+  // A parent pivot adds game interactions without overriding the Blender animation.
+  const parent=object.parent;
+  const pivot=new THREE.Group();
+  pivot.name='MINO_INTERACTION_'+object.name;
+  pivot.position.copy(object.position);
+  parent.add(pivot);
+  pivot.add(object);
+  object.position.set(0,0,0);
+  return pivot;
+}
+
+function wrapEar(headController, importedScene, names, offset) {
+  const pivot=new THREE.Group();
+  pivot.position.set(...offset);
+  headController.add(pivot);
+  names.forEach(name=>{
+    const part=importedScene.getObjectByName(name);
+    if(part && part.parent===headController){
+      part.position.sub(pivot.position);
+      pivot.add(part);
+    }
+  });
+  return pivot;
+}
+
+function makeBlenderCat(gltf) {
+  const source=gltf.scene;
+  const named=name=>source.getObjectByName(name);
+  const required=['CTRL_MINO','CTRL_TETE','CTRL_BRAS_G','CTRL_BRAS_D','CTRL_QUEUE','CTRL_OEIL_G','CTRL_OEIL_D','Bouche_Parole'];
+  if(required.some(name=>!named(name)))throw new Error('MINO: an animation controller is missing from the GLB.');
+  const wrapper=new THREE.Group();
+  wrapper.name='MINO_Blend_Character';
+  scene.add(wrapper);
+  wrapper.add(source);
+  source.traverse(object=>{
+    if(object.isMesh){object.castShadow=true;object.receiveShadow=true;}
+  });
+  const torso=named('CTRL_MINO');
+  const headControl=named('CTRL_TETE');
+  const leftEye=named('CTRL_OEIL_G');
+  const rightEye=named('CTRL_OEIL_D');
+  const leftEar=wrapEar(headControl,source,['Oreille_G','Oreille_G_Rose'],[-.82,.52,0]);
+  const rightEar=wrapEar(headControl,source,['Oreille_D','Oreille_D_Rose'],[.82,.52,0]);
+  const head=wrapAnimatedControl(headControl);
+  head.userData.leftEye=leftEye;
+  head.userData.rightEye=rightEye;
+  const arms=[wrapAnimatedControl(named('CTRL_BRAS_G')),wrapAnimatedControl(named('CTRL_BRAS_D'))];
+  const tailBase=wrapAnimatedControl(named('CTRL_QUEUE'));
+  const tailTip=new THREE.Group();
+  tailBase.add(tailTip);
+  const hits=[];
+  const hitMat=new THREE.MeshBasicMaterial({colorWrite:false,depthWrite:false,side:THREE.DoubleSide});
+  const hit=(action,position,scale)=>{
+    const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,16,12),hitMat);
+    mesh.position.set(...position);
+    mesh.scale.set(...scale);
+    mesh.userData.action=action;
+    wrapper.add(mesh);hits.push(mesh);
+  };
+  hit('head',[0,2.55,.17],[.96,.74,.73]);
+  hit('belly',[0,1.25,.3],[.62,.72,.46]);
+  hit('paws',[0,.2,.37],[.85,.28,.47]);
+  hit('tail',[-1.1,1.10,-.26],[.33,.43,.36]);
+  return {
+    root:wrapper,torso,head,arms,tailBase,tailTip,leftEar,rightEar,
+    mouth:named('Bouche_Parole'),tongue:new THREE.Object3D(),
+    hits,isBlender:true
+  };
+}
+
+// The file is produced by blender/prepare_game_asset.py, then committed to 3d/assets/.
+new GLTFLoader().load('./assets/mino_anim.glb',gltf=>{
+  let imported;
+  try { imported=makeBlenderCat(gltf); }
+  catch(error){console.error(error);say('Modèle Blender incorrect : MINO de secours affiché.');return;}
+  const previousRoot=cat.root;
+  imported.root.add(glass);
+  cat=imported;
+  gltfMixer=new THREE.AnimationMixer(gltf.scene);
+  for(const clip of gltf.animations)gltfMixer.clipAction(clip).play();
+  scene.remove(previousRoot);
+  say('MINO Blender 3D est prêt ! Touche-le ou parle-lui.');
+},undefined,error=>{
+  console.warn('MINO GLB unavailable, retaining procedural fallback:',error);
+  say('Version 3D classique. Pour charger Blender : ajouter 3d/assets/mino_anim.glb.');
+});
 
 const glass=new THREE.Group();cat.root.add(glass);
 const glassWall=new THREE.Mesh(new THREE.CylinderGeometry(.18,.14,.40,24,1,true),new THREE.MeshPhysicalMaterial({color:'#c2e5f2',transparent:true,opacity:.44,roughness:.12,metalness:0,depthWrite:false,side:THREE.DoubleSide}));
@@ -244,6 +336,7 @@ function render(time){
   requestAnimationFrame(render);
   const dt=Math.min((time-previous)/1000,.05);previous=time;
   const t=time*.001;
+  if(gltfMixer)gltfMixer.update(dt);
   cat.root.rotation.y+=(yaw-cat.root.rotation.y)*Math.min(1,dt*6);
   cat.root.position.y=0;cat.root.rotation.z=0;
   cat.torso.scale.set(1,1+Math.sin(t*2.3)*.012,1);
@@ -258,8 +351,10 @@ function render(time){
   cat.head.userData.rightEye.rotation.y=Math.sin(t*.7)*.018;
   const blink=((time+700)%5800)<160;
   const eyeScale=blink?.07:1;
-  cat.head.userData.leftEye.scale.y=eyeScale;
-  cat.head.userData.rightEye.scale.y=eyeScale;
+  if(!cat.isBlender){
+    cat.head.userData.leftEye.scale.y=eyeScale;
+    cat.head.userData.rightEye.scale.y=eyeScale;
+  }
   glass.visible=false;
   let mouthOpen=0;
 
@@ -297,9 +392,15 @@ function render(time){
     }else mouthOpen=.25+.35*Math.abs(Math.sin(t*13));
     cat.head.rotation.z+=Math.sin(t*10)*.035;
   }
-  cat.mouth.scale.y=.018+mouthOpen*.18;
-  cat.mouth.scale.x=.135+mouthOpen*.035;
-  cat.tongue.scale.y=.015+mouthOpen*.018;
+  if(cat.isBlender){
+    // The GLB mouth is positioned at its own pivot; default scale is 1.
+    cat.mouth.scale.y=1+mouthOpen*2.7;
+    cat.mouth.scale.x=1+mouthOpen*.18;
+  } else {
+    cat.mouth.scale.y=.018+mouthOpen*.18;
+    cat.mouth.scale.x=.135+mouthOpen*.035;
+    cat.tongue.scale.y=.015+mouthOpen*.018;
+  }
   renderer.render(scene,camera);
 }
 
