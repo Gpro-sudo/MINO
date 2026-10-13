@@ -161,7 +161,7 @@ def tube(name, points, r0, r1, material, sides=12):
             for j in range(sides):
                 a=(i-1)*sides+j;b=(i-1)*sides+(j+1)%sides
                 c=i*sides+j;d=i*sides+(j+1)%sides
-                fs.extend([(a,c,b),(b,c,d)])
+                fs.extend([(a,b,c),(b,d,c)])
     return mesh(name,vs,fs,material)
 
 def line(name, points, radius, material):
