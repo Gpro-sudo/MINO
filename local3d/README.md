@@ -37,6 +37,19 @@ Cette commande installe PyTorch uniquement dans `local3d/.venv-sf3d` et execute 
 
 Si le test echoue, transmettre les dernieres lignes, sans rien reinstaller a l'aveugle.
 
+## Etape 1 ter : reutiliser le nvcc CUDA 12.8 de Pinokio
+
+La machine dispose deja de `D:\\pinokio\\bin\\miniforge\\Library\\bin\\nvcc.exe`, version 12.8.93.
+Il n'est **pas utile** de reinstaller CUDA avant de verifier si les en-tetes et bibliotheques sont deja presents.
+
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\verifier_cuda_sf3d.ps1'
+```
+
+Le script ne modifie rien : il localise `nvcc`, teste `cuda_runtime.h`, `cuda.h`, les bibliotheques `cudart*.lib`, l'outil C++ Visual Studio et le `CUDA_HOME` detecte par PyTorch. Le pilote et les roues PyTorch fonctionnent deja. Attention : `nvcc 12.8` / PyTorch CUDA 12.1 est un decalage de version mineure, **pas une compatibilite de compilation garantie**. Les `setup.py` des extensions `texture_baker` et `uv_unwrapper` comportent des options Linux qui peuvent necessiter un correctif Windows.
+
 ## Etape 2 (a preparer apres le retour du script)
 
 - [Stable Fast 3D — documentation officielle](https://github.com/Stability-AI/stable-fast-3d)
