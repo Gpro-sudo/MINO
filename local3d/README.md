@@ -137,3 +137,23 @@ Lancer ensuite la premiere conversion de MINO :
 
 Le resultat se trouve dans `local3d/output/mino/0/mesh.glb`. Ne pas remplacer automatiquement `3d/assets/mino_anim.glb` : l'export brut **n'a ni squelette ni animation faciale**. Il faut d'abord le verifier et l'adapter dans Blender. A la premiere conversion, `rembg` peut telecharger son propre petit modele de suppression du fond ; un acces internet est donc requis pour l'installation initiale et le premier passage. Les executions suivantes peuvent rester locales quand tous les fichiers sont presents.
 
+
+## Etape TRELLIS — preparer un laboratoire sans modifier ComfyUI Pinokio
+
+ComfyUI Pinokio detecte sous `D:\pinokio\api\comfy.git\app` :
+- Python 3.10.20, PyTorch 2.7.0+cu128 ;
+- RTX 4060, 8 Go VRAM (environ 7,25 Go disponibles lors du test).
+
+Le module communautaire [ComfTrellis](https://github.com/Scaryplasmon/ComfTrellis) annonce 8 Go de VRAM mais son `requirements.txt` fait reference a CUDA 12.4 / PyTorch 2.5.1. Son `__init__.py` **lance automatiquement** `setup.py` pour les modules absents ; ce script peut faire intervenir pip et alterer les dependances du ComfyUI dans lequel il est installe. **Ne pas l'installer directement via ComfyUI Manager dans Pinokio**.
+
+Avant toute installation des dependances, preparer deux copies du code et un environnement virtuel distinct :
+
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\preparer_trellis_isole.ps1'
+```
+
+Ce script ne demarre pas ComfyUI, ne charge pas TRELLIS, ne telecharge pas de poids IA et **n'installe ni CUDA ni PyTorch**. Il cree uniquement `local3d/trellis_lab/ComfyUI`, y clone `ComfTrellis` comme noeud, et cree `.venv` Python 3.10 independant de Pinokio. Tout est ignore par Git. Il est prudent de ne pas demarrer cette copie tant que les dependances n'ont pas ete installees/validees explicitement.
+
+Ensuite : installer des versions compatibles PyTorch/CUDA et roues d'extensions dans le laboratoire seulement, puis tester l'import et la memoire avant de creer le premier GLB avec `local3d/inputs/mino_reference.png`. La compatibilite 8 Go reste une annonce communautaire, pas une validation sur ce PC.
