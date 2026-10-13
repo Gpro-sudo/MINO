@@ -34,7 +34,9 @@ def main() -> int:
     ):
         try:
             mod = importlib.import_module(mod_name)
-            print("OK :", mod_name, getattr(mod, "__version__", ""), flush=True)
+            # Ne jamais faire getattr(mod, "__version__") : utils3d 0.0.2
+            # essaie de charger utils3d.__version__ via son __getattr__ dynamique.
+            print("OK :", mod_name, vars(mod).get("__version__", "(non declaree)"), flush=True)
         except Exception as exc:
             failed.append(mod_name)
             print("ECHEC :", mod_name, type(exc).__name__, str(exc), flush=True)
