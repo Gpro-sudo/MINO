@@ -40,15 +40,16 @@ $venv = Join-Path $PSScriptRoot '.venv-sf3d'
 $venvPython = Join-Path $venv 'Scripts\python.exe'
 if (-not (Test-Path -LiteralPath $venvPython -PathType Leaf)) {
     Write-Host 'Creation de l environnement Python isole...' -ForegroundColor Cyan
-    $uv = Get-Command 'uv.exe' -ErrorAction SilentlyContinue
-    if (-not $uv) {
+    $uvCommand = Get-Command 'uv.exe' -ErrorAction SilentlyContinue
+    $uvPath = if ($uvCommand) { $uvCommand.Source } else { $null }
+    if (-not $uvPath) {
         $possibleUv = Join-Path $env:USERPROFILE '.local\bin\uv.exe'
         if (Test-Path -LiteralPath $possibleUv -PathType Leaf) {
-            $uv = Get-Item -LiteralPath $possibleUv
+            $uvPath = $possibleUv
         }
     }
-    if ($uv) {
-        & $uv.Source venv --python $python --seed $venv
+    if ($uvPath) {
+        & $uvPath venv --python $python --seed $venv
     } else {
         & $python -m venv $venv
     }
@@ -69,7 +70,7 @@ $nvcc = Get-Command 'nvcc.exe' -ErrorAction SilentlyContinue
 if ($nvcc) {
     & $nvcc.Source --version | Select-Object -Last 4
 } else {
-    Write-Host 'nvcc absent du PATH : il faudra verifier/installler le CUDA Toolkit compatible, avant la compilation de SF3D.' -ForegroundColor Yellow
+    Write-Host 'nvcc absent du PATH : il faudra verifier/installer le CUDA Toolkit compatible, avant la compilation de SF3D.' -ForegroundColor Yellow
 }
 Write-Host ''
 Write-Host 'PREPARATION TERMINEE : aucun modele IA ni PyTorch installe.' -ForegroundColor Green
