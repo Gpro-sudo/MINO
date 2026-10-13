@@ -203,3 +203,17 @@ powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\installer_trellis
 Le script teste d'abord PyTorch + xformers sur GPU, telecharge/verifie les deux wheels dans `local3d/trellis_lab/wheels/`, installe les 5 archives avec `pip --no-index --no-deps` (donc aucun remplacement de PyTorch), puis tente les imports natifs. Il **ne demarre pas ComfyUI**, ne modifie pas Pinokio et ne telecharge pas le modele IA.
 
 Si `MINO TRELLIS : EXTENSIONS NATIVES CHARGEES` s'affiche, les imports sont valides, mais **les noyaux natifs en execution, le demarrage de ComfyUI et les besoins reels en VRAM ne le sont pas encore**. En cas d'echec, renvoyer les lignes `ECHEC` du terminal et conserver le laboratoire en l'etat.
+
+#### Correction faux echec utils3d.__version__
+
+Sur certaines versions de `utils3d` fournies dans le noeud ComfTrellis, le paquet ne declare pas l'attribut `__version__`. Son `__getattr__` dynamique essaie de charger `utils3d.__version__` au lieu de simplement retourner un attribut absent. L'ancien test utilisait `getattr(mod, '__version__', '')`, ce qui declenchait `ModuleNotFoundError: No module named 'utils3d.__version__'` bien que l'import du paquet ait reussi. Le test actuel emploie `vars(mod).get('__version__', '')`, qui n'execute pas `__getattr__`, et essaie egalement d'importer le sous-module `utils3d.torch` exploite par TRELLIS.
+
+Dans ce cas precis, **ne pas relancer l'installation de toutes les roues**. Mettre a jour MINO, puis effectuer uniquement le test :
+
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+& '.\local3d\trellis_lab\.venv\Scripts\python.exe' '.\local3d\test_trellis_extensions.py'
+```
+
+Si le test valide tous les imports, preparer ensuite le ComfyUI isole ; sinon conserver les lignes `ECHEC` pour rechercher la dependance exacte.
