@@ -27,3 +27,17 @@ Le lanceur cherche une version **Windows Installer classique** de Blender, ou un
 **Limitation connue :** ces contrôleurs sont des pivots d'objets, pas encore une armature de déformation professionnelle. La qualité finale du personnage reste à améliorer. L'exécution réelle sous Blender 5.2 doit être validée sur un PC utilisateur.
 
 Si le programme s'arrête avec une erreur, renvoie la fin du message affiché dans la fenêtre noire. Ne relance pas le jeu WebGL avant d'avoir validé ce modèle.
+
+## Nouvelle base Stable Fast 3D — etape 1 non destructive
+
+Quand `local3d/output/mino/0/mesh.glb` a ete genere avec Stable Fast 3D, tu peux preparer une version Blender directement :
+
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+powershell -NoProfile -ExecutionPolicy Bypass -File '.\blender\preparer_mino_sf3d.ps1'
+```
+
+Le lanceur retrouve Blender 5.2 installe sur D:, importe le GLB, renomme le maillage `MINO_SF3D_CORPS`, active un affichage du materiau, applique un lissage d'affichage et **integre les textures** dans le fichier `.blend`. Il cree `blender/mino_sf3d_base.blend`, ou un nouveau fichier numerote s'il existe deja. Il ne touche ni au modele d'origine ni au jeu MINO 0.5.
+
+Ouvre le fichier genere dans Blender, observe le chat en couleur depuis l'avant, puis regarde son profil (pave numerique `3`). Envoyer des captures des deux vues pour decider comment separer les yeux et la bouche dans l'etape 2. **Il n'y a pas encore de squelette ni d'animation faciale.**
