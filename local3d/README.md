@@ -23,6 +23,20 @@ powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\preparer_sf3d.ps1
 
 Le script retrouve le CPython 3.11 installe par `uv`, cree `local3d/.venv-sf3d/` et verifie les executable. Il **n'installe pas Stable Fast 3D, PyTorch, CUDA ou les poids du modele**. L'environnement est ignore par Git.
 
+## Etape 1 bis : installer PyTorch CUDA et verifier la RTX 4060
+
+Une fois `.venv-sf3d` cree, installer les roues officielles **PyTorch 2.4.1 / torchvision 0.19.1, CUDA 12.1** et lancer un calcul GPU :
+
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\installer_pytorch_gpu.ps1'
+```
+
+Cette commande installe PyTorch uniquement dans `local3d/.venv-sf3d` et execute `test_cuda.py`, qui doit afficher `MINO CUDA : TEST REUSSI`. Le telechargement est volumineux. **Il ne faut pas installer le CUDA Toolkit avant de connaitre le resultat.** Le pilote NVIDIA moderne peut executer des roues PyTorch CUDA 12.1 sans Toolkit systeme ; le Toolkit sera eventuellement necessaire lors de la compilation d'extensions SF3D.
+
+Si le test echoue, transmettre les dernieres lignes, sans rien reinstaller a l'aveugle.
+
 ## Etape 2 (a preparer apres le retour du script)
 
 - [Stable Fast 3D — documentation officielle](https://github.com/Stability-AI/stable-fast-3d)
