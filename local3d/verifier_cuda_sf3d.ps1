@@ -44,18 +44,32 @@ $headers = @(
     (Join-Path $cudaRoot 'include\cuda_runtime.h'),
     (Join-Path $cudaRoot 'include\cuda.h')
 )
-$libs = @(
-    (Join-Path $cudaRoot 'lib\x64\cudart.lib'),
-    (Join-Path $cudaRoot 'lib\x64\cudart_static.lib')
-)
 $missing = @()
-foreach ($path in ($headers + $libs)) {
+foreach ($path in $headers) {
     if (Test-Path -LiteralPath $path -PathType Leaf) {
-        Write-Host ('OK : ' + $path) -ForegroundColor Green
+        Write-Host ('OK en-tete : ' + $path) -ForegroundColor Green
     } else {
-        Write-Host ('ABSENT : ' + $path) -ForegroundColor Yellow
+        Write-Host ('ABSENT en-tete : ' + $path) -ForegroundColor Yellow
         $missing += $path
     }
+}
+# CUDA installe par Conda est souvent dans Library\lib, pas Library\lib\x64.
+# Chercher toutes les variantes sous CUDA_HOME, pas seulement un chemin standard.
+$foundLibraries = @(Get-ChildItem -LiteralPath $cudaRoot -Filter 'cudart*.lib' -File -Recurse -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -in @('cudart.lib', 'cudart_static.lib') })
+foreach ($lib in $foundLibraries) {
+    Write-Host ('OK bibliotheque : ' + $lib.FullName) -ForegroundColor Green
+}
+if (-not @($foundLibraries | Where-Object { $_.Name -eq 'cudart.lib' }).Count) {
+    Write-Host 'ABSENT : cudart.lib non trouve sous CUDA_HOME.' -ForegroundColor Yellow
+    $missing += 'cudart.lib'
+}
+if (-not @($foundLibraries | Where-Object { $_.Name -eq 'cudart_static.lib' }).Count) {
+    Write-Host 'ABSENT : cudart_static.lib non trouve sous CUDA_HOME.' -ForegroundColor Yellow
+    $missing += 'cudart_static.lib'
+}
+if ($missing.Count -gt 0) {
+    Write-Host 'INFO : un paquet Conda CUDA runtime development/static peut etre necessaire, sans toucher a PyTorch.' -ForegroundColor Yellow
 }
 
 Write-Host ''
@@ -65,8 +79,12 @@ if (-not (Test-Path -LiteralPath $python -PathType Leaf)) {
     Write-Host 'ABSENT : environnement Python MINO' -ForegroundColor Red
     exit 3
 }
-$check = 'import torch,numpy;from torch.utils.cpp_extension import CUDA_HOME;print("PyTorch:",torch.__version__,"- CUDA:",torch.version.cuda);print("GPU operationnel:",torch.cuda.is_available());print("CUDA_HOME vu par PyTorch:",CUDA_HOME);print("NumPy:",numpy.__version__)'
-& $python -c $check
+$checkScript = Join-Path $PSScriptRoot 'diagnostic_torch_cuda.py'
+if (-not (Test-Path -LiteralPath $checkScript -PathType Leaf)) {
+    Write-Host 'ABSENT : diagnostic_torch_cuda.py. Fais git pull origin main.' -ForegroundColor Red
+    exit 4
+}
+& $python $checkScript
 if ($LASTEXITCODE -ne 0) { exit 4 }
 
 Write-Host ''
@@ -86,7 +104,7 @@ if (Test-Path -LiteralPath $vswhere -PathType Leaf) {
 Write-Host ''
 if ($missing.Count -gt 0) {
     Write-Host ('RESULTAT : nvcc fonctionne, mais ' + $missing.Count + ' composant(s) CUDA non detecte(s).') -ForegroundColor Yellow
-    Write-Host 'Une installation CUDA 12.1 separee pourra etre necessaire pour les extensions natives.'
+    Write-Host 'Il faudra identifier les paquets CUDA manquants avant toute compilation.'
 } else {
     Write-Host 'RESULTAT : nvcc, les en-tetes et les bibliotheques CUDA sont detectes.' -ForegroundColor Green
     Write-Host 'Nous pourrons essayer la compilation Windows, avec adaptation des options MSVC.'
