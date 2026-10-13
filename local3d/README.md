@@ -243,3 +243,19 @@ Dans le navigateur : `http://127.0.0.1:8189` (acces local uniquement). Ne pas la
 Sur un clone superficiel (`git clone --depth 1`) de ComfyUI, la commande `git describe --tags --exact-match HEAD` pouvait echouer si le clone ne contenait pas d'etiquettes Git. PowerShell traitait ce message Git comme une erreur fatale avec `$ErrorActionPreference = 'Stop'`. Il s'agissait d'une erreur du script, et non du GPU ni de TRELLIS.
 
 Le script corrige emploie `git tag --points-at HEAD`, qui reussit silencieusement sans etiquette, puis recupere le tag `v0.3.31` au besoin. Aucun paquet n'avait ete installe par la commande echouee : relancer simplement `git pull origin main`, puis `installer_comfyui_trellis.ps1`.
+
+### ComfyUI TRELLIS : confirmer les noeuds live avant de telecharger les poids
+
+Une fois le ComfyUI isole lance sur `http://127.0.0.1:8189` et la categorie `ComfTrellis` visible dans le navigateur, garder son terminal de lancement ouvert. L'interface seule ne prouve pas que toutes les classes de noeuds sont disponibles. Le script `verifier_noeuds_trellis.ps1` interroge l'API locale `/object_info` pour confirmer `LoadTrellisModel`, `TrellisInference`, `SaveGLBFile`, `RembgSquare` et `TrellisGrid` et afficher leurs champs requis.
+
+Il copie sans ecraser l'illustration deja preparee `local3d/inputs/mino_reference.png` vers le dossier d'entree isole `local3d/trellis_lab/ComfyUI/input/MINO_reference.png` si elle existe, et affiche l'espace disponible sur le disque. Aucun poids TRELLIS n'est telecharge, aucun noeud n'est execute.
+
+Dans une **deuxieme** fenetre PowerShell :
+
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\verifier_noeuds_trellis.ps1'
+```
+
+Resultat espere : `MINO TRELLIS : TOUS LES NOEUDS PRESENTS`. Si une entree manque, verifier le journal du terminal de lancement ComfyUI pour la premiere erreur de chargement du noeud avant d'aller plus loin. Conserver la fenetre du serveur ouverte pour les etapes ulterieures.
