@@ -305,3 +305,19 @@ powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\diagnostic_compil
 ```
 
 Envoyer surtout le paragraphe `[6] Recherche de cudart.lib`. Selon le resultat, utiliser une bibliotheque de liaison CUDA 12.4 deja disponible, ou preparer son installation de developpement separee. Ne pas copier arbitrairement un `cudart.lib` depuis Internet et ne pas changer l'installation Pinokio.
+
+### Correctif LNK1181 cudart.lib : utiliser LIB pendant le lancement de ComfyUI TRELLIS
+
+Le diagnostic a trouve la bibliotheque de liaison deja presente dans `D:\pinokio\bin\miniforge\Library\lib\cudart.lib` (117462 octets). L'ancien compilateur/lien cherchait plutot dans `...\Library\lib\x64`, donc `LINK : fatal error LNK1181: cannot open input file 'cudart.lib'`.
+
+Le script `lancer_comfyui_trellis.ps1` choisit maintenant un toolkit CUDA complet qui contient a la fois `bin\nvcc.exe` et une bibliotheque `cudart.lib` dans `lib\x64` ou `lib`. Il prefere une version 12.4 installee aux chemins standards ; sinon il peut utiliser le Toolkit CUDA 12.8 de Pinokio sans modifier celui-ci. Il ajoute **uniquement dans le processus lance** le bon `lib` au `LIB` de MSVC, le dossier `bin` au `PATH` et fixe `CUDA_HOME`/`CUDA_PATH` pour cet unique serveur. Il ne deplace et ne copie aucun fichier, ne modifie pas les variables systeme ni le venv. Une incompatibilite CUDA 12.4/12.8 reste possible au prochain essai.
+
+Pour appliquer : enregistrer le workflow et arreter son ancien serveur 8189 avec Ctrl+C (ne pas lancer deux instances en meme temps). Dans le meme terminal :
+
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\lancer_comfyui_trellis.ps1'
+```
+
+Verifier que le demarrage affiche `Bibliotheque cudart.lib : ...\Library\lib\cudart.lib` et `LIB (ajout en tete)`. Relancer le workflow MINO uniquement apres avoir constate le message de demarrage du serveur, puis transmettre le resultat de SaveGLBFile ou les dernieres lignes du rapport.
