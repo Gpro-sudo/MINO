@@ -32,7 +32,7 @@ Write-Host '[2/5] Protection des versions deja validees (PyTorch et NumPy)' -For
     'torchvision==0.20.1+cu124'
     'xformers==0.0.28.post3'
     'numpy==1.26.4'
-) | Set-Content -LiteralPath $constraints -Encoding UTF8
+) | Set-Content -LiteralPath $constraints -Encoding ASCII
 & $python (Join-Path $root 'test_trellis_torch.py')
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'ERREUR : PyTorch GPU n est plus valide. Arret avant installation.' -ForegroundColor Red
