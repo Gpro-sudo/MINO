@@ -259,3 +259,19 @@ powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\verifier_noeuds_t
 ```
 
 Resultat espere : `MINO TRELLIS : TOUS LES NOEUDS PRESENTS`. Si une entree manque, verifier le journal du terminal de lancement ComfyUI pour la premiere erreur de chargement du noeud avant d'aller plus loin. Conserver la fenetre du serveur ouverte pour les etapes ulterieures.
+
+### Correction de l'export GLB : `Ninja is required to load C++ extensions`
+
+Le noeud SaveGLBFile de ComfTrellis utilise des bibliotheques qui compilent des extensions C++/CUDA a la volee. Quand ComfyUI TRELLIS est lance via `.venv/Scripts/python.exe` sans activation du venv, le dossier `.venv/Scripts` n'est pas necessairement dans la variable PATH, meme si pip a installe `ninja==1.13.2`. Les imports des extensions peuvent reussir puis l'export GLB echouer faute de `ninja.exe` dans PATH.
+
+Le lanceur `lancer_comfyui_trellis.ps1` a ete corrige : il ajoute le dossier Scripts du venv et le chemin expose par `ninja.BIN_DIR` dans le PATH, verifie l'executable avec `ninja.exe --version`, et affiche des informations non bloquantes si `nvcc.exe` (compilateur CUDA) ou `cl.exe` (Visual Studio C++) ne sont pas presents. Le PATH est modifie uniquement dans le processus PowerShell qui lance ComfyUI et dans ses enfants ; Pinokio n'est pas touche.
+
+Etapes en cas d'export impossible : enregistrer d'abord le workflow depuis l'interface ComfyUI, arreter proprement le serveur avec Ctrl+C dans son terminal, puis dans ce terminal :
+
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\lancer_comfyui_trellis.ps1'
+```
+
+Confirmer l'affichage de `Ninja : ...\ninja.exe` et de sa version avant de relancer le workflow. Le modele TRELLIS deja telecharge sur disque ne devrait pas etre retelcharge, mais l'inference devra eventuellement etre relancee. Si une nouvelle erreur C++ ou CUDA survient, joindre le journal du terminal ; ne pas installer de composants systeme a l'aveugle.
