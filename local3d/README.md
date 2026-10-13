@@ -50,7 +50,30 @@ powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\verifier_cuda_sf3
 
 Le script ne modifie rien : il localise `nvcc`, teste `cuda_runtime.h`, `cuda.h`, les bibliotheques `cudart*.lib`, l'outil C++ Visual Studio et le `CUDA_HOME` detecte par PyTorch. Le pilote et les roues PyTorch fonctionnent deja. Attention : `nvcc 12.8` / PyTorch CUDA 12.1 est un decalage de version mineure, **pas une compatibilite de compilation garantie**. Les `setup.py` des extensions `texture_baker` et `uv_unwrapper` comportent des options Linux qui peuvent necessiter un correctif Windows.
 
-## Etape 2 (a preparer apres le retour du script)
+## Etape 2 : installer Stable Fast 3D (compilation Windows)
+
+Les derniers diagnostics confirment que le toolkit Conda de Pinokio possede `nvcc 12.8.93`, ses en-tetes, `Library/lib/cudart.lib` et `cudart_static.lib`. Le compilateur Microsoft Visual Studio 2022 est present. Les bibliotheques CUDA embarquees dans PyTorch sont en version 12.1, donc la compilation reste a valider.
+
+Dans PowerShell :
+
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+& '.\local3d\installer_sf3d.cmd'
+```
+
+Le script Windows :
+1. active temporairement `vcvars64.bat`, `CUDA_HOME`, `LIB` et `INCLUDE` sans modifier la configuration Windows ni Pinokio ;
+2. teste de nouveau PyTorch CUDA et clone les sources officielles sous `local3d/stable-fast-3d/` ;
+3. adapte dans **cette copie locale uniquement** les options GCC des deux `setup.py` en options MSVC ;
+4. epingle `numpy==1.26.4` et `setuptools==69.5.1`, installe les dependances et utilise `rembg` en mode CPU pour economiser la VRAM ;
+5. tente de compiler `texture_baker` (CUDA) puis `uv_unwrapper` (C++) et verifie les imports.
+
+Sous Windows, les deux compilations **restent experimentales**. En cas d'erreur, ne pas recreer l'environnement : partager le message affiche a l'etape en echec. Le script est relancable : il ne reclone pas automatiquement ni ne met a jour les sources existantes. Il **n'installe aucun pilote**, ne modifie pas Pinokio et ne telecharge pas encore les poids du modele.
+
+Les fichiers volumineux restent ignores par `.gitignore`. L'acces au modele lui-meme exige une demande d'autorisation sur [Hugging Face](https://huggingface.co/stabilityai/stable-fast-3d) ; ne jamais publier de jeton prive.
+
+## Etape 3 : autorisation du modele et premiere generation
 
 - [Stable Fast 3D — documentation officielle](https://github.com/Stability-AI/stable-fast-3d)
 - [Modele Hugging Face a acces controle](https://huggingface.co/stabilityai/stable-fast-3d)
