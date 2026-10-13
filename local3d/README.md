@@ -157,3 +157,19 @@ powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\preparer_trellis_
 Ce script ne demarre pas ComfyUI, ne charge pas TRELLIS, ne telecharge pas de poids IA et **n'installe ni CUDA ni PyTorch**. Il cree uniquement `local3d/trellis_lab/ComfyUI`, y clone `ComfTrellis` comme noeud, et cree `.venv` Python 3.10 independant de Pinokio. Tout est ignore par Git. Il est prudent de ne pas demarrer cette copie tant que les dependances n'ont pas ete installees/validees explicitement.
 
 Ensuite : installer des versions compatibles PyTorch/CUDA et roues d'extensions dans le laboratoire seulement, puis tester l'import et la memoire avant de creer le premier GLB avec `local3d/inputs/mino_reference.png`. La compatibilite 8 Go reste une annonce communautaire, pas une validation sur ce PC.
+
+### TRELLIS : installer le GPU UNIQUEMENT dans le laboratoire
+
+Le diagnostic Pinokio valide Python 3.10.20, mais ComfyUI utilise PyTorch 2.7.0+cu128. Ne pas lancer ni installer le noeud communautaire dans ce ComfyUI. ComfTrellis depend d'extensions prevues pour PyTorch 2.5.1 + CUDA 12.4 ; la documentation officielle PyTorch associe 2.5.1 a torchvision 0.20.1. xformers 0.0.28.post3 fournit une roue Windows cp310 pour CUDA 12.4.
+
+Une fois `local3d/trellis_lab/.venv` prepare, utiliser :
+
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\installer_trellis_torch.ps1'
+```
+
+Ce script installe `numpy==1.26.4`, `torch==2.5.1`, `torchvision==0.20.1` et `xformers==0.0.28.post3` **dans le venv du laboratoire seulement**. Il teste CUDA sur la RTX 4060 avec une multiplication de tenseurs et une operation `xformers.ops.memory_efficient_attention`. Il ne demarre pas TRELLIS et ne change rien dans `D:\pinokio\api\comfy.git\app`.
+
+Attendre le message `MINO TRELLIS : PYTORCH ET XFORMERS GPU OPERATIONNELS`. Les extensions Kaolin, Spconv, nvdiffrast, vox2seq, etc., et les poids TRELLIS restent a installer/valider plus tard. Si l'installation echoue, conserver le venv et transmettre les messages d'erreur ; ne pas reinstalller ComfyUI.
