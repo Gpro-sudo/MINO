@@ -35,23 +35,23 @@ $env:PATH = "$ninjaBin;$env:PATH"
 Write-Host ('Ninja : ' + (Join-Path $ninjaBin 'ninja.exe')) -ForegroundColor Green
 & ninja.exe --version
 if ($LASTEXITCODE -ne 0) { throw 'ninja.exe est present mais ne demarre pas.' }
-# LNK1181 cudart.lib : conda installe cudart.lib dans Library\\lib,
-# mais nvdiffrast cherche souvent Library\\lib\\x64.
+# LNK1181 cudart.lib : conda installe cudart.lib dans Library\lib,
+# mais nvdiffrast cherche souvent Library\lib\x64.
 # Le linker MSVC consulte aussi la variable LIB : on la complete SANS
 # copier le fichier ni modifier CUDA ou le PATH systeme Windows.
 $cudaRoots = @(
-    'D:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.4'
-    'C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.4'
+    'D:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.4'
+    'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.4'
     $env:CUDA_HOME
     $env:CUDA_PATH
-    'D:\\pinokio\\bin\\miniforge\\Library'
+    'D:\pinokio\bin\miniforge\Library'
 ) | Where-Object { $_ } | Select-Object -Unique
 $selectedCuda = $null
 $selectedLib = $null
 foreach ($candidate in $cudaRoots) {
-    $nvccCandidate = Join-Path $candidate 'bin\\nvcc.exe'
+    $nvccCandidate = Join-Path $candidate 'bin\nvcc.exe'
     if (-not (Test-Path -LiteralPath $nvccCandidate -PathType Leaf)) { continue }
-    foreach ($subdir in @('lib\\x64', 'lib')) {
+    foreach ($subdir in @('lib\x64', 'lib')) {
         $libCandidate = Join-Path $candidate $subdir
         if (Test-Path -LiteralPath (Join-Path $libCandidate 'cudart.lib') -PathType Leaf) {
             $selectedCuda = $candidate
