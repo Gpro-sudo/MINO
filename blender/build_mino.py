@@ -71,7 +71,7 @@ def mesh(name, verts, faces, material, colors=None):
     ob.data.materials.append(material)
     for p in geometry.polygons: p.use_smooth=True
     if colors:
-        ca=geometry.vertex_colors.new(name='Pelage')
+        ca=geometry.color_attributes.new(name='Pelage',type='FLOAT_COLOR',domain='CORNER')
         # vertex_colors uses one color per loop
         for polygon in geometry.polygons:
             for li in polygon.loop_indices:
@@ -96,8 +96,8 @@ def ellipsoid(name, center, size, material, warp=None, rows=26, segments=36, col
         for j in range(segments):
             a=i*segments+j; b=i*segments+(j+1)%segments
             c=(i+1)*segments+j; d=(i+1)*segments+(j+1)%segments
-            faces.append((a,c,b))
-            faces.append((b,c,d))
+            faces.append((a,b,c))
+            faces.append((b,d,c))
     col=[colors(*v) for v in verts] if colors else None
     return mesh(name,verts,faces,material,col)
 
