@@ -9,7 +9,7 @@ Write-Host ''
 $procs = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
     Where-Object {
         ($_.Name -match '^(python|pythonw)(\.exe)?$') -and
-        ($_.CommandLine -match '(?i)ComfyUI|[\\/]main\.py(?:\s|["'']|$)')
+        ($_.CommandLine -match '(?i)ComfyUI|(?:^|\s|[\\/])main\.py(?:\s|["'']|$)')
     })
 if ($procs.Count -eq 0) {
     Write-Host '[INFO] Aucun processus Python ComfyUI trouve automatiquement.' -ForegroundColor Yellow
@@ -32,7 +32,7 @@ foreach ($proc in $procs) {
 foreach ($exe in $uniqueExe) {
     Write-Host ''
     Write-Host ('[2] Interpreter Python : ' + $exe) -ForegroundColor Yellow
-    & $exe -c 'import sys,platform;print("Python",sys.version.split()[0]);print("Architecture",platform.architecture()[0]);print("Executable",sys.executable)'
+    & $exe --version
     Write-Host 'Paquet torch installe dans cet interpreteur :'
     & $exe -m pip show torch 2>$null | Where-Object { $_ -match '^(Name|Version|Location):' }
     if ($LASTEXITCODE -ne 0) {
