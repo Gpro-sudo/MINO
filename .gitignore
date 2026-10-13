@@ -12,3 +12,6 @@ __pycache__/
 local3d/inputs/
 # Projets Blender SF3D locaux generés, sans ecraser le projet Blender anterieur.
 blender/mino_sf3d_base*.blend*
+
+# ComfyUI et TRELLIS en laboratoire local isole (modeles, paquets, donnees).
+local3d/trellis_lab/
