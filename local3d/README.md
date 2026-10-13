@@ -237,3 +237,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\lancer_comfyui_tr
 ```
 
 Dans le navigateur : `http://127.0.0.1:8189` (acces local uniquement). Ne pas lancer cette commande avant que les dependances soient verifiees, et en cas d'erreur conserver les dernieres lignes de la console. La presence des noeuds ComfTrellis reste a confirmer par le journal de lancement, et le modele `JeffreyXiang/TRELLIS-image-large` n'est pas encore telecharge.
+
+#### Correctif : erreur Git `No names found, cannot describe anything`
+
+Sur un clone superficiel (`git clone --depth 1`) de ComfyUI, la commande `git describe --tags --exact-match HEAD` pouvait echouer si le clone ne contenait pas d'etiquettes Git. PowerShell traitait ce message Git comme une erreur fatale avec `$ErrorActionPreference = 'Stop'`. Il s'agissait d'une erreur du script, et non du GPU ni de TRELLIS.
+
+Le script corrige emploie `git tag --points-at HEAD`, qui reussit silencieusement sans etiquette, puis recupere le tag `v0.3.31` au besoin. Aucun paquet n'avait ete installe par la commande echouee : relancer simplement `git pull origin main`, puis `installer_comfyui_trellis.ps1`.
