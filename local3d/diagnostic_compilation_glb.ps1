@@ -37,19 +37,7 @@ if (-not (Test-Path -LiteralPath $python -PathType Leaf)) {
     Write-Host ('ERREUR : Python introuvable : ' + $python)
     exit 1
 }
-$py = @'
-import sys
-import torch
-from torch.utils import cpp_extension
-print("Python :", sys.executable)
-print("PyTorch :", torch.__version__)
-print("CUDA PyTorch :", torch.version.cuda)
-print("CUDA_HOME PyTorch :", cpp_extension.CUDA_HOME)
-print("GPU disponible :", torch.cuda.is_available())
-if torch.cuda.is_available():
-    print("GPU :", torch.cuda.get_device_name(0))
-'@
-& $python -c $py
+& $python (Join-Path $root 'diagnostic_compilation_glb.py')
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'ERREUR : diagnostic Python impossible.'
     exit 2
