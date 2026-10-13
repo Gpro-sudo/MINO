@@ -31,6 +31,7 @@ def main() -> int:
         "diff_gaussian_rasterization",
         "diffoctreerast",
         "utils3d",
+        "utils3d.torch",  # sous-module utilise pour les operations 3D de TRELLIS
     ):
         try:
             mod = importlib.import_module(mod_name)
