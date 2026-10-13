@@ -16,7 +16,7 @@ cd blender
 
 3. Patienter pendant la génération du modèle, puis ouvrir **mino_rig.blend** dans Blender.
 
-Le lanceur recherche automatiquement Blender, notamment l'installation Microsoft Store dans WindowsApps. Il lance **build_mino.py** qui crée directement la géométrie à partir de Blender ; aucun fichier \`mino_base.glb\`, Python ou paquet extérieur n'est nécessaire.
+Le lanceur cherche une version **Windows Installer classique** de Blender, ou une version portable placee dans `MINO/BlenderPortable`. Les fichiers `blender.exe` de la version Microsoft Store se trouvent dans `WindowsApps` et ne sont pas directement accessibles au script (erreur Windows `Access is denied`). Il faut donc utiliser l'installateur Windows de [blender.org](https://www.blender.org/download/) sans desinstaller la version Store. Il lance **build_mino.py** qui crée directement la géométrie à partir de Blender ; aucun fichier \`mino_base.glb\`, Python ou paquet extérieur n'est nécessaire.
 
 ### Résultats attendus
 
