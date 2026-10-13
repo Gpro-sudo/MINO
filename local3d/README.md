@@ -187,3 +187,19 @@ powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\installer_trellis
 Il protege avec des contraintes `torch==2.5.1+cu124`, `torchvision==0.20.1+cu124`, `xformers==0.0.28.post3`, `numpy==1.26.4`. Il installe Kaolin 0.17.0 depuis les roues NVIDIA prevues pour PyTorch 2.5.1/CUDA 12.4 et SpConv `spconv-cu124`, ainsi que les bibliotheques Python de manipulation 3D et de traitement d'image. `rembg` utilise une installation ONNX CPU plutot que de consommer inutilement la VRAM de 8 Go pour supprimer le fond.
 
 Resultat attendu : `MINO TRELLIS : BIBLIOTHEQUES DE BASE DISPONIBLES`. Ces composants ne suffisent pas encore a demarrer TRELLIS : il reste plusieurs extensions precompilees CUDA, la compatibilite avec ComfyUI, puis les poids du modele. Ne pas encore demarrer `trellis_lab/ComfyUI`.
+
+### TRELLIS : extensions natives Windows (roues precompilees)
+
+Quand `installer_trellis_bibliotheques.ps1` affiche `MINO TRELLIS : BIBLIOTHEQUES DE BASE DISPONIBLES`, il reste cinq extensions Windows a installer : `diff_gaussian_rasterization`, `diffoctreerast`, `utils3d`, `nvdiffrast`, `vox2seq`.
+
+La copie du depot communautaire ComfTrellis contient deja les trois premieres roues (`wheels/...`). Les deux dernieres sont recuperees depuis les roues Windows Python 3.10 / PyTorch 2.5.1 / CUDA 12.4 du depot [MrForExample/Comfy3D_Pre_Builds](https://github.com/MrForExample/Comfy3D_Pre_Builds), utilise par l'installateur ComfTrellis lui-meme. Ce sont **des binaires communautaires tiers**, pas des composants verifies officiellement par Microsoft ou NVIDIA. Le script controle les tailles et l'integrite ZIP, mais ne peut pas auditer le code compile.
+
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\installer_trellis_extensions.ps1'
+```
+
+Le script teste d'abord PyTorch + xformers sur GPU, telecharge/verifie les deux wheels dans `local3d/trellis_lab/wheels/`, installe les 5 archives avec `pip --no-index --no-deps` (donc aucun remplacement de PyTorch), puis tente les imports natifs. Il **ne demarre pas ComfyUI**, ne modifie pas Pinokio et ne telecharge pas le modele IA.
+
+Si `MINO TRELLIS : EXTENSIONS NATIVES CHARGEES` s'affiche, les imports sont valides, mais **les noyaux natifs en execution, le demarrage de ComfyUI et les besoins reels en VRAM ne le sont pas encore**. En cas d'echec, renvoyer les lignes `ECHEC` du terminal et conserver le laboratoire en l'etat.
