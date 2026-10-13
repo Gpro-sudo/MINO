@@ -173,3 +173,17 @@ powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\installer_trellis
 Ce script installe `numpy==1.26.4`, `torch==2.5.1`, `torchvision==0.20.1` et `xformers==0.0.28.post3` **dans le venv du laboratoire seulement**. Il teste CUDA sur la RTX 4060 avec une multiplication de tenseurs et une operation `xformers.ops.memory_efficient_attention`. Il ne demarre pas TRELLIS et ne change rien dans `D:\pinokio\api\comfy.git\app`.
 
 Attendre le message `MINO TRELLIS : PYTORCH ET XFORMERS GPU OPERATIONNELS`. Les extensions Kaolin, Spconv, nvdiffrast, vox2seq, etc., et les poids TRELLIS restent a installer/valider plus tard. Si l'installation echoue, conserver le venv et transmettre les messages d'erreur ; ne pas reinstalller ComfyUI.
+
+### TRELLIS : dependances de base Kaolin et SpConv (etape suivante)
+
+Apres le succes de `installer_trellis_torch.ps1`, ne **pas** installer ComfTrellis depuis le Manager de Pinokio. Le code du noeud communautaire lance un `setup.py` automatiquement quand il manque des paquets, et cette copie referencerait des roues CUDA de versions differentes. Le laboratoire TRELLIS est isole : le script suivant neutralise cet auto-installateur dans sa seule copie locale, puis installe explicitement les dependances.
+
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\installer_trellis_bibliotheques.ps1'
+```
+
+Il protege avec des contraintes `torch==2.5.1+cu124`, `torchvision==0.20.1+cu124`, `xformers==0.0.28.post3`, `numpy==1.26.4`. Il installe Kaolin 0.17.0 depuis les roues NVIDIA prevues pour PyTorch 2.5.1/CUDA 12.4 et SpConv `spconv-cu124`, ainsi que les bibliotheques Python de manipulation 3D et de traitement d'image. `rembg` utilise une installation ONNX CPU plutot que de consommer inutilement la VRAM de 8 Go pour supprimer le fond.
+
+Resultat attendu : `MINO TRELLIS : BIBLIOTHEQUES DE BASE DISPONIBLES`. Ces composants ne suffisent pas encore a demarrer TRELLIS : il reste plusieurs extensions precompilees CUDA, la compatibilite avec ComfyUI, puis les poids du modele. Ne pas encore demarrer `trellis_lab/ComfyUI`.
