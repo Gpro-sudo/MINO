@@ -47,9 +47,11 @@ if ($LASTEXITCODE -ne 0) { throw "Impossible de lire l'etat Git du ComfyUI isole
 if ($trackedChanges.Count -gt 0 -and (($trackedChanges -join '')).Trim().Length -gt 0) {
     throw 'Le ComfyUI isole comporte des modifications suivies : refus de changer sa version.'
 }
-$currentTag = (& $git.Source -C $comfy describe --tags --exact-match HEAD 2>$null)
-if ($LASTEXITCODE -ne 0) { $currentTag = '' }
-if ("$currentTag".Trim() -ne $comfyVersion) {
+# git describe echoue sur un clone --depth 1 sans aucun tag.
+# git tag --points-at HEAD est silencieux et reussit meme si aucun tag n'existe.
+$currentTags = @(& $git.Source -C $comfy tag --points-at HEAD)
+if ($LASTEXITCODE -ne 0) { throw 'Impossible de consulter les tags du ComfyUI isole.' }
+if ($currentTags -notcontains $comfyVersion) {
     Write-Host ('Recuperation du tag ' + $comfyVersion + ' (seulement dans trellis_lab)')
     Invoke-Checked $git.Source @('-C', $comfy, 'fetch', '--depth', '1', 'origin', 'tag', $comfyVersion)
     Invoke-Checked $git.Source @('-C', $comfy, 'checkout', '--detach', $comfyVersion)
