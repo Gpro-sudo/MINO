@@ -114,10 +114,25 @@ Essai avec la photo de chaise fournie dans le depot officiel :
 ```
 
 Si la generation reussit, ouvrir `local3d/output/test_chaise/0/mesh.glb` dans Blender.
-Puis, avec une illustration PNG **originale de MINO** (fond transparent recommande) :
+
+### Choix de l'image originale de MINO
+
+Le meilleur point de depart est **`assets/mino-idle.webp`** : le chat entier, de face, les yeux verts ouverts, la bouche fermee et le fond transparent. Les variantes `mino-blink.webp` et `mino-talk.webp` sont moins adaptees : une pose de visage anime pourrait etre incorporee au maillage 3D. Les captures du jeu incluent trop de decor.
+
+Un script prepare automatiquement cette image depuis le depot et la met au bon format sans changer le personnage :
 
 ```powershell
-& '.\local3d\generer_sf3d.cmd' 'D:\chemin\vers\mino_reference.png'
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+& '.\local3d\.venv-sf3d\Scripts\python.exe' '.\local3d\preparer_reference_mino.py'
+```
+
+Il cree `local3d/inputs/mino_reference.png` (1024 x 1024, RGBA, fond transparent, proportions conservees). Le source original reste intact, et le PNG genere est ignore par Git.
+
+Lancer ensuite la premiere conversion de MINO :
+
+```powershell
+& '.\local3d\generer_sf3d.cmd' '.\local3d\inputs\mino_reference.png'
 ```
 
 Le resultat se trouve dans `local3d/output/mino/0/mesh.glb`. Ne pas remplacer automatiquement `3d/assets/mino_anim.glb` : l'export brut **n'a ni squelette ni animation faciale**. Il faut d'abord le verifier et l'adapter dans Blender. A la premiere conversion, `rembg` peut telecharger son propre petit modele de suppression du fond ; un acces internet est donc requis pour l'installation initiale et le premier passage. Les executions suivantes peuvent rester locales quand tous les fichiers sont presents.
