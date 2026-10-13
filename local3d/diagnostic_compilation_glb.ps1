@@ -52,5 +52,51 @@ if (Test-Path -LiteralPath $vswhere -PathType Leaf) {
     Write-Host 'vswhere.exe absent du chemin Visual Studio standard.'
 }
 Write-Host ''
+Write-Host '[6] Recherche de cudart.lib (bibliotheque de liaison CUDA)' -ForegroundColor Yellow
+$roots = @(
+    $env:CUDA_HOME
+    $env:CUDA_PATH
+    'D:\pinokio\bin\miniforge\Library'
+    'D:\pinokio\bin\miniforge'
+    (Join-Path $root 'trellis_lab\.venv\Lib\site-packages\torch')
+)
+foreach ($toolkitBase in @(
+    'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA'
+    'D:\Program Files\NVIDIA GPU Computing Toolkit\CUDA'
+)) {
+    if (Test-Path -LiteralPath $toolkitBase -PathType Container) {
+        $roots += @(Get-ChildItem -LiteralPath $toolkitBase -Directory -ErrorAction SilentlyContinue |
+            Select-Object -ExpandProperty FullName)
+    }
+}
+$condaPkgs = 'D:\pinokio\bin\miniforge\pkgs'
+if (Test-Path -LiteralPath $condaPkgs -PathType Container) {
+    $roots += @(Get-ChildItem -LiteralPath $condaPkgs -Directory -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -match '(?i)cudart|cuda-nvcc|cuda-toolkit' } |
+        Select-Object -ExpandProperty FullName)
+}
+$foundLibs = @()
+foreach ($prefix in ($roots | Where-Object { $_ } | Select-Object -Unique)) {
+    foreach ($subpath in @('lib\x64\cudart.lib', 'lib\cudart.lib', 'Library\lib\x64\cudart.lib', 'Library\lib\cudart.lib', 'cudart.lib')) {
+        $candidate = Join-Path $prefix $subpath
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) {
+            $fullPath = (Get-Item -LiteralPath $candidate).FullName
+            if ($foundLibs -notcontains $fullPath) {
+                $foundLibs += $fullPath
+                $size = (Get-Item -LiteralPath $candidate).Length
+                Write-Host ('TROUVE : ' + $fullPath + ' (' + $size + ' octets)') -ForegroundColor Green
+            }
+        }
+    }
+}
+if ($foundLibs.Count -eq 0) {
+    Write-Host 'INTROUVABLE aux emplacements habituels sur C: et D:.' -ForegroundColor Yellow
+    Write-Host 'Le paquet de developpement CUDA (contenant cudart.lib) pourrait etre absent.'
+    Write-Host 'Ne telecharge aucun fichier .lib isole depuis un site non officiel.'
+}
+Write-Host ''
+Write-Host 'IMPORTANT : une bibliotheque 12.4 est preferable, car PyTorch utilise CUDA 12.4.'
+Write-Host 'Ne change pas CUDA_HOME, CUDA_PATH ou le PATH systeme avant verification.'
+Write-Host ''
 Write-Host '========== FIN DIAGNOSTIC, AUCUNE MODIFICATION ==========' -ForegroundColor Green
 Write-Host 'Envoie ce resultat ET les dernieres lignes de l erreur SaveGLBFile (fin du rapport).'
