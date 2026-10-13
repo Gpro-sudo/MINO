@@ -18,6 +18,13 @@ function Find-Blender {
     $roots = @()
     if ($env:ProgramFiles) { $roots += (Join-Path $env:ProgramFiles 'Blender Foundation') }
     if (${env:ProgramFiles(x86)}) { $roots += (Join-Path ${env:ProgramFiles(x86)} 'Blender Foundation') }
+    # Some users install Blender in D:\Program Files or another drive.
+    # Search every mounted filesystem drive without touching protected WindowsApps.
+    foreach ($drive in @(Get-PSDrive -PSProvider FileSystem -ErrorAction SilentlyContinue)) {
+        $candidateRoot = Join-Path (Join-Path $drive.Root 'Program Files') 'Blender Foundation'
+        $roots += $candidateRoot
+    }
+    $roots = @($roots | Select-Object -Unique)
     foreach ($root in $roots) {
         if (-not (Test-Path -LiteralPath $root -PathType Container)) { continue }
         foreach ($dir in (Get-ChildItem -LiteralPath $root -Directory -ErrorAction SilentlyContinue |
@@ -47,7 +54,7 @@ function Find-Blender {
 Write-Host '[MINO] Recherche de Blender accessible...' -ForegroundColor Cyan
 $exe = Find-Blender
 if (-not $exe) {
-    Write-Host '[MINO] Blender Microsoft Store detecte, mais il ne peut pas etre lance directement par ce script.' -ForegroundColor Yellow
+    Write-Host '[MINO] Aucun Blender executable trouve dans les dossiers Program Files.' -ForegroundColor Yellow
     Write-Host 'Installe la version Windows Installer depuis https://www.blender.org/download/' -ForegroundColor Yellow
     Write-Host 'Choisis Windows Installer (pas Microsoft Store). Tu peux conserver les deux versions.'
     Write-Host 'Une fois l installation terminee, relance creer_mino.bat.'
