@@ -217,3 +217,23 @@ git pull origin main
 ```
 
 Si le test valide tous les imports, preparer ensuite le ComfyUI isole ; sinon conserver les lignes `ECHEC` pour rechercher la dependance exacte.
+
+### ComfyUI TRELLIS isole : installer le serveur (Python 3.10 / torch 2.5.1 CUDA 12.4)
+
+Quand `test_trellis_extensions.py` affiche `MINO TRELLIS : EXTENSIONS NATIVES CHARGEES`, le noeud reste pret cote bibliotheques mais le serveur ComfyUI manque encore. Le ComfyUI telecharge initialement depuis la branche recente ne convient pas necessairement aux anciennes extensions (2025). `installer_comfyui_trellis.ps1` selectionne **ComfyUI v0.3.31** dans le depot local ignore `local3d/trellis_lab/ComfyUI`, sans modifier les fichiers de Pinokio. Si cette copie contient deja des modifications Git suivies, la commande s'arrete plutot que de les ecraser.
+
+Avant installation, le script verifie que l'auto-installateur ComfTrellis a bien ete neutralise dans le laboratoire et reteste PyTorch/xformers et les extensions natives. Il installe **torchaudio 2.5.1+cu124**, fixe `transformers==4.48.3` et `huggingface-hub==0.34.4` pour rester compatibles avec cette generation de ComfyUI et installer toutes ses dependances. Un fichier de contraintes bloque toute mise a niveau de `torch==2.5.1+cu124`, `torchvision==0.20.1+cu124`, `xformers==0.0.28.post3` et `numpy==1.26.4`.
+
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\installer_comfyui_trellis.ps1'
+```
+
+Si `MINO TRELLIS : COMFYUI ISOLE PRET POUR DEMARRAGE` apparait, alors seulement lancer **le ComfyUI isole sur le port 8189**, different du port 8188 de Pinokio :
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\lancer_comfyui_trellis.ps1'
+```
+
+Dans le navigateur : `http://127.0.0.1:8189` (acces local uniquement). Ne pas lancer cette commande avant que les dependances soient verifiees, et en cas d'erreur conserver les dernieres lignes de la console. La presence des noeuds ComfTrellis reste a confirmer par le journal de lancement, et le modele `JeffreyXiang/TRELLIS-image-large` n'est pas encore telecharge.
