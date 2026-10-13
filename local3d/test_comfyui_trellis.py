@@ -6,6 +6,7 @@ importer ComfTrellis (__init__.py contient une routine tierce d'installation).
 from __future__ import annotations
 
 import os
+import importlib
 from pathlib import Path
 import sys
 
@@ -31,7 +32,7 @@ def main() -> int:
         "aiohttp", "yaml", "folder_paths", "comfy.model_management",
     ):
         try:
-            mod = __import__(name, fromlist=["*"])
+            mod = importlib.import_module(name)
             version = vars(mod).get("__version__", "(non declaree)")
             print("OK :", name, version, flush=True)
         except Exception as exc:
