@@ -275,3 +275,19 @@ powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\lancer_comfyui_tr
 ```
 
 Confirmer l'affichage de `Ninja : ...\ninja.exe` et de sa version avant de relancer le workflow. Le modele TRELLIS deja telecharge sur disque ne devrait pas etre retelcharge, mais l'inference devra eventuellement etre relancee. Si une nouvelle erreur C++ ou CUDA survient, joindre le journal du terminal ; ne pas installer de composants systeme a l'aveugle.
+
+### Export TRELLIS GLB : erreur de compilation `nvdiffrast_plugin`
+
+Si l'aperçu 3D fonctionne mais `SaveGLBFile` affiche `Error building extension 'nvdiffrast_plugin'` apres que Ninja a ete trouve, l'inference a deja fonctionne et il reste un probleme de compilation des plugins C++/CUDA nvdiffrast pour l'export. Ne pas reinstaller les poids ni le venv.
+
+La sortie visible peut se limiter aux commandes de compilation (`[1/16] cl`, `[3/16] nvcc`) et ne montre pas encore la cause (`fatal error`, `error Cxxxx`, `nvcc fatal`, etc.). Il faut conserver les **dernieres lignes completes** du rapport d'erreur ComfyUI ou de la fenetre du serveur. Le compilateur CUDA indique dans ce cas le repertoire `D:\pinokio\bin\miniforge\Library\bin` ; verifier sa vraie version plutot que de deduire une incompatibilite.
+
+Dans un **deuxieme** PowerShell, le diagnostic suivant est en lecture seule et n'effectue aucune compilation :
+
+```powershell
+cd 'D:\07-Logiciels\37-MINO'
+git pull origin main
+powershell -NoProfile -ExecutionPolicy Bypass -File '.\local3d\diagnostic_compilation_glb.ps1'
+```
+
+Transmettre le resultat et les 30-50 dernieres lignes de l'erreur de `SaveGLBFile`. Le diagnostic affiche les chemins `ninja.exe`, `nvcc.exe`, `cl.exe`, la version nvcc, les variables CUDA et le `CUDA_HOME` que voit PyTorch 2.5.1+cu124. Selon le message precis, il faudra corriger les outils systeme detectes, pas le modele 3D.
