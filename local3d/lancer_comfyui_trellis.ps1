@@ -18,6 +18,30 @@ Write-Host 'Arret : Ctrl+C dans cette fenetre PowerShell.'
 Write-Host 'Port distinct du ComfyUI Pinokio (habituellement 8188).'
 Write-Host 'Ne modifie ni Pinokio ni Stable Fast 3D.'
 Write-Host ''
+# Le venv est appele sans activation PowerShell. Or, torch.utils.cpp_extension
+# cherche ninja.exe dans PATH, notamment pour SaveGLBFile / nvdiffrast.
+$venvScripts = Split-Path -Path $python -Parent
+$env:PATH = "$venvScripts;$env:PATH"
+$ninjaBin = ''
+$ninjaBinOutput = @(& $python -c 'import ninja; print(ninja.BIN_DIR)')
+if ($LASTEXITCODE -ne 0) {
+    throw "Le module ninja n est pas disponible dans le venv TRELLIS. Controle l installation de ninja."
+}
+if ($ninjaBinOutput.Count -gt 0) { $ninjaBin = "$($ninjaBinOutput[-1])".Trim() }
+if (-not (Test-Path -LiteralPath (Join-Path $ninjaBin 'ninja.exe') -PathType Leaf)) {
+    throw "ninja.exe introuvable dans le paquet Python ninja : $ninjaBin"
+}
+$env:PATH = "$ninjaBin;$env:PATH"
+Write-Host ('Ninja : ' + (Join-Path $ninjaBin 'ninja.exe')) -ForegroundColor Green
+& ninja.exe --version
+if ($LASTEXITCODE -ne 0) { throw 'ninja.exe est present mais ne demarre pas.' }
+# D'autres compilateurs peuvent etre necessaires apres Ninja.
+if (-not (Get-Command nvcc.exe -ErrorAction SilentlyContinue)) {
+    Write-Host 'INFO : nvcc.exe absent du PATH. Un compilateur CUDA peut etre requis pour l export GLB.' -ForegroundColor Yellow
+}
+if (-not (Get-Command cl.exe -ErrorAction SilentlyContinue)) {
+    Write-Host 'INFO : cl.exe absent du PATH. MSVC peut etre requis pour compiler les extensions C++.' -ForegroundColor Yellow
+}
 $env:ATTN_BACKEND = 'xformers'
 $env:SPCONV_ALGO = 'native'
 Push-Location -LiteralPath $comfy
