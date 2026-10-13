@@ -10,3 +10,5 @@ local3d/.cache/
 __pycache__/
 *.pyc
 local3d/inputs/
+# Projets Blender SF3D locaux generés, sans ecraser le projet Blender anterieur.
+blender/mino_sf3d_base*.blend*
